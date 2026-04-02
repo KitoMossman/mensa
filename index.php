@@ -15,6 +15,14 @@ try {
                     ADD COLUMN antwort_gewuenscht TINYINT(1) DEFAULT 0, 
                     ADD COLUMN antwort TEXT NULL");
     }
+    
+    $stmtUpgrade2 = $pdo->query("SHOW COLUMNS FROM nachrichten LIKE 'erstellt_am'");
+    if ($stmtUpgrade2->rowCount() == 0) {
+        $pdo->exec("ALTER TABLE nachrichten 
+                    ADD COLUMN erstellt_am DATETIME DEFAULT CURRENT_TIMESTAMP, 
+                    ADD COLUMN abgerufen_am DATETIME NULL, 
+                    ADD COLUMN nutzer_rueckantwort TEXT NULL");
+    }
 } catch (Exception $e) {}
 // ----------------------------------------
 
