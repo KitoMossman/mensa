@@ -1,407 +1,248 @@
-
 <?php
-session_set_cookie_params(0);
-session_start();
+require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/Database.php';
 
-require 'conn.php';
+initSession();
+$pdo = Database::getInstance()->getConnection();
 
-if (isset($_POST['wunschauswahl'])){
-    $anzahl = 0;
-    $wunschSql = "SELECT * FROM wunschspeisen where wunschspeise_nr=".$_POST['wunschauswahl'];
-    foreach ($conn->query($wunschSql) as $wunschRow) {
-      $anzahl = $wunschRow['wunschspeise_anzahl'];
+$messages = "";
+
+// 1. Abstimmung Vollkost
+if (isset($_POST['wunschauswahl']) && !isset($_SESSION['wunschauswahl'])) {
+    $stmt = $pdo->prepare("UPDATE wunschspeisen SET wunschspeise_anzahl = wunschspeise_anzahl + 1 WHERE wunschspeise_nr = ?");
+    if ($stmt->execute([$_POST['wunschauswahl']])) {
+        $_SESSION['wunschauswahl'] = $_POST['wunschauswahl'];
     }
-
-    $statement = $conn->prepare("UPDATE wunschspeisen SET wunschspeise_anzahl = ? WHERE wunschspeise_nr = ?");
-    $statement->execute(array($anzahl+1, $_POST['wunschauswahl']));
-    $_SESSION['wunschauswahl'] = $_POST['wunschauswahl'];
 }
-elseif (isset($_POST['wunschauswahl2'])){
-    $anzahl = 0;
-    $wunschSql = "SELECT * FROM wunschspeisen where wunschspeise_nr=".$_POST['wunschauswahl2'];
-    foreach ($conn->query($wunschSql) as $wunschRow) {
-      $anzahl = $wunschRow['wunschspeise_anzahl'];
+
+// 2. Abstimmung Vegetarisch
+if (isset($_POST['wunschauswahl2']) && !isset($_SESSION['wunschauswahl2'])) {
+    $stmt = $pdo->prepare("UPDATE wunschspeisen SET wunschspeise_anzahl = wunschspeise_anzahl + 1 WHERE wunschspeise_nr = ?");
+    if ($stmt->execute([$_POST['wunschauswahl2']])) {
+        $_SESSION['wunschauswahl2'] = $_POST['wunschauswahl2'];
     }
-
-    $statement = $conn->prepare("UPDATE wunschspeisen SET wunschspeise_anzahl = ? WHERE wunschspeise_nr = ?");
-    $statement->execute(array($anzahl+1, $_POST['wunschauswahl2']));
-    $_SESSION['wunschauswahl2'] = $_POST['wunschauswahl2'];
-}
-?>
-
-<!DOCTYPE html>
-<html>
-<head>
-<title>Wunschspeisen</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<style>
-* {
-  box-sizing: border-box;
-}
-#myInput {
-  background-position: 10px 10px;
-  background-repeat: no-repeat;
-  width: 100%;
-  font-size: 16px;
-  padding: 12px 20px 12px 40px;
-  border: 1px solid #ddd;
-  margin-bottom: 12px;
 }
 
-#myTable {
-  border-collapse: collapse;
-  width: 100%;
-  border: 1px solid #ddd;
-  font-size: 18px;
+// 3. Neue Wunschspeise eintragen
+if (isset($_POST['name'], $_POST['beilage'], $_POST['art'], $_POST['kategorie'])) {
+    $neueSpeiseName = trim($_POST['name']) . " mit " . trim($_POST['beilage']);
+    $stmt = $pdo->prepare("INSERT INTO wunschspeisen (wunschspeise_name, wunschspeise_art, wunschspeise_kategorie, wunschspeise_anzahl) VALUES (?, ?, ?, 0)");
+    $stmt->execute([$neueSpeiseName, $_POST['art'], $_POST['kategorie']]);
+    $messages = "<h1 class='w3-jumbo w3-center w3-text-green'>Vielen Dank für die Eingabe</h1>";
 }
 
-#myTable th, #myTable td {
-  text-align: left;
-  padding: 12px;
-}
+$pageTitle = 'Wunschspeisen';
 
-#myTable tr {
-  border-bottom: 1px solid #ddd;
-}
-
-#myInput2 {
-  background-position: 10px 10px;
-  background-repeat: no-repeat;
-  width: 100%;
-  font-size: 16px;
-  padding: 12px 20px 12px 40px;
-  border: 1px solid #ddd;
-  margin-bottom: 12px;
-}
-
-#myTable2 {
-  border-collapse: collapse;
-  width: 100%;
-  border: 1px solid #ddd;
-  font-size: 18px;
-}
-
-#myTable2 th, #myTable2 td {
-  text-align: left;
-  padding: 12px;
-}
-
-#myTable2 tr {
-  border-bottom: 1px solid #ddd;
-}
-
-
-body, h1,h2,h3,h4,h5,h6 {font-family: "Arial", sans-serif}
-.w3-row-padding img {margin-bottom: 12px}
-/* Set the width of the sidebar to 120px */
-.w3-sidebar {width: 120px;background: #222;}
-/* Add a left margin to the "page content" that matches the width of the sidebar (120px) */
-#main {margin-left: 120px}
-/* Remove margins from "page content" on small screens */
-@media only screen and (max-width: 600px) {#main {margin-left: 0}}
-input[type='radio'] {
-     transform: scale(2.5);
- }
-</style>
-</head>
-<body class="w3-black">
-
-<!-- Icon Bar (Sidebar - hidden on small screens) -->
-<nav class="w3-sidebar w3-bar-block w3-small w3-hide-small w3-center">
-  <!-- Avatar image in top left corner -->
-  <img src="images/croissant.jpg" style="height:120px">
-<!--  <a href="#" class="w3-bar-item w3-button w3-padding-large w3-black">
-    <i class="fa fa-asterisk w3-xxlarge"></i>
-    <p>Springe zu Eingabe</p>
-  </a>
--->
+// Sidebar
+$sidebarHtml = '
   <a href="#vollkost" class="w3-bar-item w3-button w3-padding-large w3-black">
-    <i class="fa fa-asterisk w3-xxlarge"></i>
-    <p>Springe zu Vollkost</p>
+    <i class="fa fa-asterisk w3-xxlarge"></i><p>Springe zu Vollkost</p>
   </a>
   <a href="#vegetarisch" class="w3-bar-item w3-button w3-padding-large w3-black">
-    <i class="fa fa-asterisk w3-xxlarge"></i>
-    <p>Springe zu Vegetarisch</p>
+    <i class="fa fa-asterisk w3-xxlarge"></i><p>Springe zu Vegetarisch</p>
   </a>
-  <?php
-  if (!isset($_SESSION['wunschauswahl'])) {
-    echo "<form action='./wunschTabelle.php#vollkost' method='post'>";
-      echo "<input type='hidden' name='wunschauswahlbutton'>";
-      echo "<button type='submit' form='my-form' class='w3-bar-item w3-button w3-padding-large w3-hover-black'>";
-        echo "<i class='fa fa-check w3-xxlarge' style='color: green'></i>";
-        echo "<p>Vollkost abstimmen</p>";
-      echo "</button>";
-    echo "</form>";
-  }
-  ?>
-  <?php
-  if (!isset($_SESSION['wunschauswahl2'])) {
-    echo "<form action='./wunschTabelle.php#vegetarisch' method='post'>";
-      echo "<input type='hidden' name='wunschauswahlbutton2'>";
-      echo "<button type='submit' form='my-form2' class='w3-bar-item w3-button w3-padding-large w3-hover-black'>";
-        echo "<i class='fa fa-check w3-xxlarge' style='color: blue'></i>";
-        echo "<p>Vegetarisch abstimmen</p>";
-      echo "</button>";
-    echo "</form>";
-  }
-  ?>
-  <form action="./index.php" method="post">
+';
+if (!isset($_SESSION['wunschauswahl'])) {
+    $sidebarHtml .= '
+    <button type="submit" form="my-form" class="w3-bar-item w3-button w3-padding-large w3-hover-black">
+      <i class="fa fa-check w3-xxlarge" style="color: green"></i><p>Vollkost abstimmen</p>
+    </button>';
+}
+if (!isset($_SESSION['wunschauswahl2'])) {
+    $sidebarHtml .= '
+    <button type="submit" form="my-form2" class="w3-bar-item w3-button w3-padding-large w3-hover-black">
+      <i class="fa fa-check w3-xxlarge" style="color: blue"></i><p>Vegetarisch abstimmen</p>
+    </button>';
+}
+
+$sidebarHtml .= '
+  <form action="./index.php" method="post" style="margin:0;">
     <input type="hidden" name="logout">
-    <button type="submit" class="w3-bar-item w3-button w3-padding-large w3-hover-black">
-      <i class="fa fa-lock w3-xxlarge"></i>
-      <p>LOGOUT</p>
+    <button type="submit" class="w3-bar-item w3-button w3-padding-large w3-hover-black w3-block">
+      <i class="fa fa-home w3-xxlarge"></i><p>STARTSEITE</p>
     </button>
   </form>
-</nav>
+';
 
-<!-- Navbar on small screens (Hidden on medium and large screens) -->
-<div class="w3-top w3-hide-large w3-hide-medium" id="myNavbar">
-  <div class="w3-bar w3-black w3-opacity w3-hover-opacity-off w3-center w3-small">
+$navbarSmallHtml = '
     <a href="#" class="w3-bar-item w3-button" style="width:25% !important">Wunschspeisen</a>
-  </div>
-</div>
+';
 
-<!-- Page Content -->
-<div class="w3-padding-large" id="main">
+require __DIR__ . '/templates/header.php';
+?>
+
   <header class="w3-container w3-padding-32 w3-center w3-black" id="eingabe">
     <h1 class="w3-jumbo">Eingabe Wunschspeisen</h1>
   </header>
 
-  <?php
-  if (!isset($_POST['art'])) {
-    echo "<form action='./wunschTabelle.php?' method='post' accept-charset='UTF-8'>";
-      echo "<p><input class='w3-input w3-padding-16' type='text' placeholder='Wunschspeise' name='name'></p>";
-      echo "<p>";
-        echo "<select class='w3-input w3-padding-16' placeholder='Beilage' name='beilage' required>";
-        echo "<option value='' disabled selected>Beilage auswählen</option>";
-        require 'conn.php';
-        $sql = "SELECT * FROM beilagen order by beilage_art";
-        foreach ($conn->query($sql) as $row) {
-  
- // änderung - ausgabe des freitextes im auswahlmenü mit umlauten nun korrekt ohne utf8_encode
-   
-        //  echo "<option value=".utf8_encode($row['beilage_name']).">".utf8_encode($row['beilage_art'])." - ".utf8_encode($row['beilage_name'])."</option>";
-            echo "<option value=".           ($row['beilage_name']).">".           ($row['beilage_art'])." - ".           ($row['beilage_name'])."</option>";   
+  <?php if (!empty($messages)): ?>
+      <?php echo $messages; ?>
+  <?php else: ?>
+      <form action='./wunschTabelle.php#eingabe' method='post'>
+        <p><input class='w3-input w3-padding-16' type='text' placeholder='Wunschspeise (z.B. Schnitzel)' name='name' required></p>
+        <p>
+          <select class='w3-input w3-padding-16' name='beilage' required>
+            <option value='' disabled selected>Beilage auswählen</option>
+            <?php
+            $stmt = $pdo->query("SELECT * FROM beilagen ORDER BY beilage_art, beilage_name");
+            while ($row = $stmt->fetch()) {
+                echo "<option value='" . h($row['beilage_name']) . "'>" . h($row['beilage_art']) . " - " . h($row['beilage_name']) . "</option>";
+            }
+            ?>
+          </select>
+        </p>
+        <p>
+          <select class='w3-input w3-padding-16' name='art' required>
+            <option value='' disabled selected>Speiseart auswählen</option>
+            <option value='Vollkost'>Vollkost</option>
+            <option value='Vegetarisch'>Vegetarisch</option>
+          </select>
+        </p>
+        <p>
+          <select class='w3-input w3-padding-16' name='kategorie' required>
+            <option value='' disabled selected>Kategorie auswählen</option>
+            <option value='-'>-</option>
+            <option value='Fleisch'>Fleisch</option>
+            <option value='Fisch'>Fisch</option>
+            <option value='Süßes'>Süßes</option>
+          </select>
+        </p>
+        <p>
+          <button class='w3-button w3-light-grey w3-padding-large' type='submit'>
+            <i class='fa fa-paper-plane'></i> Abschicken
+          </button>
+        </p>
+      </form>
+  <?php endif; ?>
 
+  <hr>
 
-        
-
-
-
-
-        }
-        echo "</select>";
-      echo "</p>";
-      echo "<p>";
-        echo "<select class='w3-input w3-padding-16' placeholder='Speiseart' name='art' required>";
-        echo "<option value='' disabled selected>Speiseart auswählen</option>";
-        echo "<option value='Vollkost'>Vollkost</option>";
-        echo "<option value='Vegetarisch'>Vegetarisch</option>";
-        echo "</select>";
-      echo "</p>";
-      echo "<p>";
-        echo "<select class='w3-input w3-padding-16' placeholder='Kategorie' name='kategorie' required>";
-        echo "<option value='' disabled selected>Kategorie auswählen</option>";
-        echo "<option value='-'>-</option>";
-        echo "<option value='Fleisch'>Fleisch</option>";
-        echo "<option value='Fisch'>Fisch</option>";
-        echo "<option value='Süßes'>Süßes</option>";
-        echo "</select>";
-      echo "</p>";
-      echo "<p>";
-        echo "<button class='w3-button w3-light-grey w3-padding-large' type='submit'>";
-          echo "<i class='fa fa-paper-plane'></i> Abschicken";
-        echo "</button>";
-      echo "</p>";
-    echo "</form>";
-  } else {
-    require 'conn.php';
-    $conn->query("SET character_set_results = 'utf8', character_set_client = 'utf8', character_set_connection = 'utf8', character_set_database = 'utf8', character_set_server = 'utf8'");
-    $statement = $conn->prepare("INSERT INTO wunschspeisen (wunschspeise_name, wunschspeise_art, wunschspeise_kategorie, wunschspeise_anzahl) VALUES (?, ?, ?, ?)");
-    $statement->execute(array(htmlspecialchars($_POST['name'])." mit ".htmlspecialchars($_POST['beilage']), htmlspecialchars($_POST['art']), htmlspecialchars($_POST['kategorie']), 0));
-    echo "<h1 class='w3-jumbo w3-center'>Vielen Dank für die Eingabe</h1>";
-  }
-  ?>
-
-  <!-- Header/Home -->
+  <!-- VOLLKOST WUNSCHSPEISEN -->
   <div id="vollkost">
-  <header class="w3-container w3-padding-32 w3-center w3-black" id="vollkost_header">
-    <h1 class="w3-jumbo">Vollkost Wunschspeisen</h1>
-  </header>
+    <header class="w3-container w3-padding-32 w3-center w3-black">
+      <h1 class="w3-jumbo">Vollkost Wunschspeisen</h1>
+    </header>
 
-  <input type="text" id="myInput" onkeyup="myFunction('myInput', 'myTable')" placeholder="Suche nach Speise..." title="Type in a name">
+    <input type="text" id="myInput" onkeyup="myFunction('myInput', 'myTable')" placeholder="Suche nach Speise..." class="w3-input w3-border w3-padding-16 w3-marginBottom">
 
-<?php
-  header('Content-Type: text/html; charset=UTF-8');
+    <form id="my-form" action="./wunschTabelle.php#vollkost" method="post">
+      <table class="w3-table-all w3-large w3-pale-green" id="myTable">
+        <tr class="w3-green">
+          <th style="width:5%;">Platz</th>
+          <th style="width:10%;">Auswahl</th>
+          <th style="width:10%;">Stimmen</th>
+          <th style="width:15%;">Art</th>
+          <th style="width:15%;">Kategorie</th>
+          <th style="width:45%;">Speise</th>
+        </tr>
+        <?php
+        $platz = 1;
+        $stmt = $pdo->query("SELECT * FROM wunschspeisen WHERE wunschspeise_art='Vollkost' ORDER BY wunschspeise_anzahl DESC, wunschspeise_kategorie ASC");
+        while ($row = $stmt->fetch()) {
+            echo "<tr>";
+            echo "<td>" . $platz++ . "</td>";
+            
+            $disabled = isset($_SESSION['wunschauswahl']) ? "disabled" : "";
+            $checked = (isset($_SESSION['wunschauswahl']) && $_SESSION['wunschauswahl'] == $row['wunschspeise_nr']) ? "checked" : "";
+            
+            echo "<td class='w3-center'><input type='radio' name='wunschauswahl' value='" . $row['wunschspeise_nr'] . "' $disabled $checked></td>";
+            echo "<td>" . h($row['wunschspeise_anzahl']) . "</td>";
+            echo "<td>" . h($row['wunschspeise_art']) . "</td>";
+            echo "<td>" . h($row['wunschspeise_kategorie']) . "</td>";
+            echo "<td>" . h($row['wunschspeise_name']) . "</td>";
+            echo "</tr>";
+        }
+        ?>
+      </table>
+      <br>
+      <?php if (!isset($_SESSION['wunschauswahl'])): ?>
+        <button class='w3-button w3-jumbo w3-green w3-padding-large' type='submit'>
+          <i class='fa fa-paper-plane'></i> Abstimmen
+        </button>
+      <?php else: ?>
+        <p class="w3-text-green">Du hast bereits für Vollkost abgestimmt.</p>
+      <?php endif; ?>
+    </form>
+  </div>
+
+  <hr>
+
+  <!-- VEGETARISCH WUNSCHSPEISEN -->
+  <div id="vegetarisch">
+    <header class="w3-container w3-padding-32 w3-center w3-black">
+      <h1 class="w3-jumbo">Vegetarische Wunschspeisen</h1>
+    </header>
+
+    <input type="text" id="myInput2" onkeyup="myFunction('myInput2', 'myTable2')" placeholder="Suche nach Speise..." class="w3-input w3-border w3-padding-16 w3-marginBottom">
+
+    <form id="my-form2" action="./wunschTabelle.php#vegetarisch" method="post">
+      <table class="w3-table-all w3-large w3-pale-blue" id="myTable2">
+        <tr class="w3-blue">
+          <th style="width:5%;">Platz</th>
+          <th style="width:10%;">Auswahl</th>
+          <th style="width:10%;">Stimmen</th>
+          <th style="width:15%;">Art</th>
+          <th style="width:15%;">Kategorie</th>
+          <th style="width:45%;">Speise</th>
+        </tr>
+        <?php
+        $platz = 1;
+        $stmt = $pdo->query("SELECT * FROM wunschspeisen WHERE wunschspeise_art='Vegetarisch' ORDER BY wunschspeise_anzahl DESC, wunschspeise_kategorie ASC");
+        while ($row = $stmt->fetch()) {
+            echo "<tr>";
+            echo "<td>" . $platz++ . "</td>";
+            
+            $disabled = isset($_SESSION['wunschauswahl2']) ? "disabled" : "";
+            $checked = (isset($_SESSION['wunschauswahl2']) && $_SESSION['wunschauswahl2'] == $row['wunschspeise_nr']) ? "checked" : "";
+            
+            echo "<td class='w3-center'><input type='radio' name='wunschauswahl2' value='" . $row['wunschspeise_nr'] . "' $disabled $checked></td>";
+            echo "<td>" . h($row['wunschspeise_anzahl']) . "</td>";
+            echo "<td>" . h($row['wunschspeise_art']) . "</td>";
+            echo "<td>" . h($row['wunschspeise_kategorie']) . "</td>";
+            echo "<td>" . h($row['wunschspeise_name']) . "</td>";
+            echo "</tr>";
+        }
+        ?>
+      </table>
+      <br>
+      <?php if (!isset($_SESSION['wunschauswahl2'])): ?>
+        <button class='w3-button w3-jumbo w3-blue w3-padding-large' type='submit'>
+          <i class='fa fa-paper-plane'></i> Abstimmen
+        </button>
+      <?php else: ?>
+        <p class="w3-text-blue">Du hast bereits für Vegetarisch abgestimmt.</p>
+      <?php endif; ?>
+    </form>
+  </div>
+
+  <style>.w3-marginBottom { margin-bottom: 16px; }</style>
+
+  <script>
+  function myFunction(inputId, tableId) {
+    var input = document.getElementById(inputId);
+    var filter = input.value.toUpperCase();
+    var table = document.getElementById(tableId);
+    var tr = table.getElementsByTagName("tr");
+    
+    for (var i = 1; i < tr.length; i++) { // Skip header row
+      var display = false;
+      // Check columns 3 (Art), 4 (Kategorie), 5 (Speise name)
+      for (var col = 3; col <= 5; col++) {
+          var td = tr[i].getElementsByTagName("td")[col];
+          if (td) {
+            var txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+              display = true;
+              break;
+            }
+          }
+      }
+      tr[i].style.display = display ? "" : "none";
+    }
+  }
+  </script>
+
+<?php 
+require_once __DIR__ . '/impressum.php';
+require __DIR__ . '/templates/footer.php'; 
 ?>
-
-<form id="my-form" action="./wunschTabelle.php#vollkost" method="post">
-  <table class="w3-pale-green" id="myTable">
-    <tr class="header w3-green">
-      <th style="width:5%;">Platz</th>
-      <th style="width:10%;">Auswahl</th>
-      <th style="width:10%;">Anzahl</th>
-      <th style="width:15%;">Speiseart</th>
-      <th style="width:15%;">Kategorie</th>
-      <th style="width:45%;">Speise</th>
-    </tr>
-    <?php
-
-      require 'conn.php';
-
-      $platz = 1;
-      $wunschSql = "SELECT * FROM wunschspeisen where wunschspeise_art='Vollkost' order by wunschspeise_anzahl DESC, wunschspeise_kategorie";
-      foreach ($conn->query($wunschSql) as $wunschRow) {
-        echo "<tr>";
-          echo "<td>".$platz++."</td>";
-          echo "<td class='w3-center'><input type='radio' name='wunschauswahl' value=".$wunschRow['wunschspeise_nr']."></td>";
-
-        // echo "<td>".utf8_encode($wunschRow['wunschspeise_anzahl'])."</td>";
-        // echo "<td>".utf8_encode($wunschRow['wunschspeise_art'])."</td>";
-        // echo "<td>".utf8_encode($wunschRow['wunschspeise_kategorie'])."</td>";
-        // echo "<td>".utf8_encode($wunschRow['wunschspeise_name'])."</td>";
-          
-          
-// änderung - ausgabe des freitextes in der tabelle mit umlauten nun korrekt ohne utf8_encode		
-		          
-          echo "<td>".($wunschRow['wunschspeise_anzahl'])."</td>";
-          echo "<td>".($wunschRow['wunschspeise_art'])."</td>";
-          echo "<td>".($wunschRow['wunschspeise_kategorie'])."</td>";
-          echo "<td>".($wunschRow['wunschspeise_name'])."</td>";          
-
-        echo "</tr>";
-      }
-
-    ?>
-
-  </table>
-  <br>
-  <br>
-  <?php
-  if (!isset($_SESSION['wunschauswahl'])) {
-    echo "<button class='w3-button w3-jumbo w3-green w3-padding-large' type='submit'>";
-      echo "<i class='fa fa-paper-plane'></i> Abstimmen";
-    echo "</button>";
-  }
-  ?>
- </form>
-</div>
- <!---------Vegetarisch--------------->
-<div id="vegetarisch">
-
- <header class="w3-container w3-padding-32 w3-center w3-black" id="vegetarisch_header">
-   <h1 class="w3-jumbo">Vegetarische Wunschspeisen</h1>
- </header>
-
- <?php
-   header('Content-Type: text/html; charset=UTF-8');
- ?>
- <input type="text" id="myInput2" onkeyup="myFunction('myInput2', 'myTable2')" placeholder="Suche nach Speise..." title="Type in a name2">
-
-<form id="my-form2" action="./wunschTabelle.php#vegetarisch" method="post">
- <table class="w3-pale-blue" id="myTable2">
-   <tr class="header w3-blue">
-     <th style="width:5%;">Platz</th>
-     <th style="width:10%;">Auswahl</th>
-     <th style="width:10%;">Anzahl</th>
-     <th style="width:15%;">Speiseart</th>
-     <th style="width:15%;">Kategorie</th>
-     <th style="width:45%;">Speise</th>
-   </tr>
-   <?php
-
-     require 'conn.php';
-
-     $platz = 1;
-     $wunschSql = "SELECT * FROM wunschspeisen where wunschspeise_art='Vegetarisch' order by wunschspeise_anzahl DESC, wunschspeise_kategorie";
-     foreach ($conn->query($wunschSql) as $wunschRow) {
-       echo "<tr>";
-         echo "<td>".$platz++."</td>";
-         echo "<td class='w3-center'><input type='radio' name='wunschauswahl2' value=".$wunschRow['wunschspeise_nr']."></td>";
-
-
-       //  echo "<td>".utf8_encode($wunschRow['wunschspeise_anzahl'])."</td>";
-       //  echo "<td>".utf8_encode($wunschRow['wunschspeise_art'])."</td>";
-       //  echo "<td>".utf8_encode($wunschRow['wunschspeise_kategorie'])."</td>";
-       //  echo "<td>".utf8_encode($wunschRow['wunschspeise_name'])."</td>";
-
-// änderung: entfernung des charset utf8_encode damit die umlaute korrekt dargestellt werden (23.05.2024 Christian Lehr)
-
-         echo "<td>".($wunschRow['wunschspeise_anzahl'])."</td>";
-         echo "<td>".($wunschRow['wunschspeise_art'])."</td>";
-         echo "<td>".($wunschRow['wunschspeise_kategorie'])."</td>";
-         echo "<td>".($wunschRow['wunschspeise_name'])."</td>";
-
-
-
-
-       echo "</tr>";
-     }
-
-   ?>
-
- </table>
-  <br>
-  <br>
-<?php
-if (!isset($_SESSION['wunschauswahl2'])) {
- echo "<button class='w3-button w3-jumbo w3-blue w3-padding-large' type='submit'>";
-   echo "<i class='fa fa-paper-plane'></i> Abstimmen";
- echo "</button>";
-}
-?>
-</form>
-</div>
-</div>
-<?php
-require 'impressum.php';
- ?>
-
-<!-- END PAGE CONTENT -->
-</div>
-
-<script>
-function myFunction($input, $table) {
-  var input, filter, table, tr, td, i, txtValue;
-  input = document.getElementById($input);
-  filter = input.value.toUpperCase();
-  table = document.getElementById($table);
-  tr = table.getElementsByTagName("tr");
-  for (i = 0; i < tr.length; i++) {
-    td = tr[i].getElementsByTagName("td")[3]
-    if (td) {
-      txtValue = td.textContent || td.innerText;
-      if (txtValue.toUpperCase().indexOf(filter) > -1) {
-        tr[i].style.display = "";
-      } else {
-        tr[i].style.display = "none";
-      }
-    }
-  }
-  for (i = 0; i < tr.length; i++) {
-    td = tr[i].getElementsByTagName("td")[4]
-    if (td) {
-      txtValue = td.textContent || td.innerText;
-      if (txtValue.toUpperCase().indexOf(filter) > -1) {
-        tr[i].style.display = "";
-      }
-    }
-  }
-  for (i = 0; i < tr.length; i++) {
-    td = tr[i].getElementsByTagName("td")[5]
-    if (td) {
-      txtValue = td.textContent || td.innerText;
-      if (txtValue.toUpperCase().indexOf(filter) > -1) {
-        tr[i].style.display = "";
-      }
-    }
-  }
-}
-</script>
-
-</body>
-</html>

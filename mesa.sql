@@ -59,7 +59,7 @@ CREATE TABLE `admins` (
 
 LOCK TABLES `admins` WRITE;
 /*!40000 ALTER TABLE `admins` DISABLE KEYS */;
-INSERT INTO `admins` VALUES ('Administrator','IT1234maki'),('Kueche','IT12345maki');
+INSERT INTO `admins` VALUES ('Administrator','$2y$12$R6Hwl1YHD594EPyLbIy6aOJIy7Hg8xVNo31S8N2xzJryjzpQWmNfG'),('Kueche','$2y$12$YlfUtgVI0LRByr3HKw0i9u6AiWsyMIsP90VgEVgK0V978ta4OuD3y');
 /*!40000 ALTER TABLE `admins` ENABLE KEYS */;
 UNLOCK TABLES;
 
