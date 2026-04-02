@@ -19,10 +19,6 @@ if (isset($_POST['reply_id'], $_POST['antwort_text'])) {
 if (isset($_POST['delete'])) {
     $pdo->query("DELETE FROM nachrichten");
     $message = "<div class='w3-panel w3-green'><p>Alle Nachrichten wurden gelöscht.</p></div>";
-} else {
-    // Automatically delete old messages without reply functionality, 
-    // BUT keep unanswered items longer or just let everything age out by 30 days.
-    $pdo->query("DELETE FROM nachrichten WHERE datum < NOW() - INTERVAL 30 DAY");
 }
 
 $pageTitle = 'Nachrichten';
