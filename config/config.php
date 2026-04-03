@@ -2,9 +2,9 @@
 // config/config.php
 
 define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', 'Education23.70');
-define('DB_NAME', 'mensa');
+define('DB_USER', 'USER448338_maki');
+define('DB_PASS', 'IT123_maki');
+define('DB_NAME', 'db_448338_9');
 define('DB_CHARSET', 'utf8mb4');
 
 define('APP_NAME', 'Mensa Administration');
