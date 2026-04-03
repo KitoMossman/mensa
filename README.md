@@ -46,11 +46,11 @@ Das Projekt setzt auf eine strikte Trennung von Geschäftslogik und Design sowie
 * **XSS-Schutz**: Sämtliche Benutzerausgaben werden konsequent über die `h()`-Funktion maskiert.
 * **Anonymität**: Das Nachrichtensystem arbeitet ohne personenbezogene Daten; die Zuordnung erfolgt ausschließlich über Ticket-IDs und Geheimwörter.
 
-### 3. Anonymes Ticketsystem (`abrufen.php` / `nachrichten.php`)
+### 3. Anonymes Ticketsystem (integriert in `index.php` / `nachrichten.php`)
 
 Ein ticket-basiertes System ermöglicht die Kommunikation mit der Küche (z. B. für Sonderkost-Anfragen):
 
 * Nutzer generieren beim Senden einer Nachricht eine **Ticket-ID** und ein Wort-basiertes **Geheimwort**.
-* Die Küche antwortet im Admin-Dashboard.
-* Nutzer können die Antwort anonym abrufen und eine einmalige Rückantwort senden.
-* Sobald die Kommunikation abgeschlossen ist, kann die Küche das Ticket vollständig löschen.
+* Die Küche antwortet im Admin-Dashboard (`nachrichten.php`).
+* Nutzer können die Antwort anonym über den Tab **"ANTWORT"** in der `index.php` abrufen und eine einmalige Rückantwort senden.
+* Sobald die Kommunikation abgeschlossen ist, kann die Küche das Ticket im Admin-Bereich vollständig löschen.

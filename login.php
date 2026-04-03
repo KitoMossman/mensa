@@ -191,7 +191,7 @@ require __DIR__ . '/templates/header.php';
                   if ($speisenRow['speise_art'] === 'Leichte Vollkost') $colClass = "col-lvk";
                   if ($speisenRow['speise_art'] === 'Vegetarisch') $colClass = "col-veg";
 
-                  echo "<td class='$colClass'>" . h($speisenRow['speise_name']) . "</td>";
+                  echo "<td class='$colClass'>" . formatMealName($speisenRow['speise_name']) . "</td>";
                   echo "<td class='$colClass'>" . h($speisenRow['speise_art']) . "</td>";
                   echo "<td>" . h($datumFormatted) . "</td>";
                   echo "<td>" . h($abstimmungsRow['cnt']) . "</td>";

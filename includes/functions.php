@@ -48,3 +48,22 @@ function requireAdmin() {
         die('Bitte zuerst <a href="./index.php#login">einloggen</a>');
     }
 }
+/**
+ * Highlights the meal name (before parentheses) and mutes additives.
+ * @param string|null $name The full meal name.
+ * @return string The formatted HTML.
+ */
+function formatMealName($name) {
+    if ($name === null || $name === '') {
+        return '';
+    }
+    
+    $pos = strpos($name, '(');
+    if ($pos !== false) {
+        $title = substr($name, 0, $pos);
+        $additives = substr($name, $pos);
+        return '<span class="meal-title">' . h($title) . '</span><span class="meal-additives">' . h($additives) . '</span>';
+    }
+    
+    return '<span class="meal-title">' . h($name) . '</span>';
+}

@@ -149,7 +149,7 @@ require __DIR__ . '/templates/header.php';
                 echo "<td class='w3-center'><div class='modern-radio-container'><input type='radio' name='wunschauswahl' value='" . $row['wunschspeise_nr'] . "' $disabled $checked></div></td>";
                 echo "<td>" . h($row['wunschspeise_anzahl']) . "</td>";
                 echo "<td>" . h($row['wunschspeise_kategorie']) . "</td>";
-                echo "<td>" . h($row['wunschspeise_name']) . "</td>";
+                echo "<td>" . formatMealName($row['wunschspeise_name']) . "</td>";
                 echo "</tr>";
             }
             ?>
@@ -206,7 +206,7 @@ require __DIR__ . '/templates/header.php';
                 echo "<td class='w3-center'><div class='modern-radio-container'><input type='radio' name='wunschauswahl2' value='" . $row['wunschspeise_nr'] . "' $disabled $checked></div></td>";
                 echo "<td>" . h($row['wunschspeise_anzahl']) . "</td>";
                 echo "<td>" . h($row['wunschspeise_kategorie']) . "</td>";
-                echo "<td>" . h($row['wunschspeise_name']) . "</td>";
+                echo "<td>" . formatMealName($row['wunschspeise_name']) . "</td>";
                 echo "</tr>";
             }
             ?>
@@ -254,5 +254,6 @@ function myFunction(inputId, tableId) {
 
 <?php 
 require_once __DIR__ . '/impressum.php';
+require __DIR__ . '/templates/header.php'; 
 require __DIR__ . '/templates/footer.php'; 
 ?>
