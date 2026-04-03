@@ -10,38 +10,20 @@ if (!isset($pageTitle)) {
 <title><?php echo h($pageTitle); ?></title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="./style.css">
-<?php
-// Add w3.css if not in style.css or specifically required (the original files loaded it from w3schools)
-?>
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<style>
-body, h1,h2,h3,h4,h5,h6 {font-family: "Arial", sans-serif}
-.w3-row-padding img {margin-bottom: 12px}
-/* Set the width of the sidebar to 120px */
-.w3-sidebar {width: 120px;background: #222;}
-/* Add a left margin to the "page content" that matches the width of the sidebar (120px) */
-#main, #main2 {margin-left: 120px}
-/* Remove margins from "page content" on small screens */
-@media only screen and (max-width: 600px) {#main, #main2 {margin-left: 0}}
-input[type='radio'] {
-     transform: scale(2.5);
-}
-td select.w3-input {
-    max-width: 500px; 
-    min-width: 150px;
-    text-overflow: ellipsis;
-}
-</style>
+<link rel="stylesheet" href="./style.css">
 </head>
-<body class="w3-black">
+<body class="modern-dark">
 
 <!-- Icon Bar (Sidebar - hidden on small screens) -->
-<nav class="w3-sidebar w3-bar-block w3-small w3-hide-small w3-center">
+<nav class="w3-sidebar modern-sidebar w3-hide-small w3-center">
   <!-- Avatar image in top left corner -->
-  <img src="images/croissant.jpg" style="height:120px">
+  <div class="sidebar-avatar">
+    <img src="images/croissant.jpg" alt="Mensa Logo">
+  </div>
+
   
   <?php if (isset($sidebarHtml)): ?>
       <?php echo $sidebarHtml; ?>
@@ -58,4 +40,65 @@ td select.w3-input {
 </div>
 
 <!-- Page Content -->
-<div class="w3-padding-large" id="main">
+<div id="main">
+
+<script>
+function openTab(tabId, event) {
+  if (event) {
+    event.preventDefault();
+  }
+  
+  // Hide all elements with class="tab-content"
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tab-content");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].classList.remove("active");
+  }
+
+  // Remove the class "active" from all tablinks
+  tablinks = document.querySelectorAll(".modern-sidebar a.w3-bar-item, #myNavbar a.w3-bar-item");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].classList.remove("active");
+  }
+
+  // Show the current tab, and add an "active" class to the link that opened the tab
+  var targetTab = document.getElementById(tabId);
+  if (targetTab) {
+    targetTab.classList.add("active");
+    // Explicitly scroll to top
+    window.scrollTo(0, 0);
+  }
+
+  // Add active class to corresponding sidebar/navbar items
+  var links = document.querySelectorAll('a[onclick*="openTab(\'' + tabId + '\'"]');
+  links.forEach(function(link) {
+    link.classList.add("active");
+  });
+
+  // Update URL hash without jumping
+  if (history.pushState) {
+    history.pushState(null, null, '#' + tabId);
+  } else {
+    location.hash = '#' + tabId;
+  }
+}
+
+// Handle initial load and browser back/forward
+window.addEventListener('load', function() {
+  var hash = window.location.hash.substring(1);
+  if (hash) {
+    openTab(hash);
+  } else {
+    // Default to the first available tab-content
+    var firstTab = document.querySelector('.tab-content');
+    if (firstTab) {
+      openTab(firstTab.id);
+    }
+  }
+});
+
+window.addEventListener('hashchange', function() {
+  var hash = window.location.hash.substring(1);
+  if (hash) openTab(hash);
+});
+</script>

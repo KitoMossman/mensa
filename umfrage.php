@@ -40,7 +40,7 @@ if ($hasUmfrage) {
 
 $pageTitle = 'Umfrage';
 $sidebarHtml = '
-  <a href="./login.php" class="w3-bar-item w3-button w3-padding-large w3-black">
+  <a href="./login.php" class="w3-bar-item w3-button w3-padding-large">
     <i class="fa fa-arrow-left w3-xxlarge"></i><p>ZURÜCK</p>
   </a>
 ';
@@ -51,90 +51,96 @@ $navbarSmallHtml = '
 require __DIR__ . '/templates/header.php';
 ?>
 
-  <!-- Header/Home -->
-  <header class="w3-container w3-padding-32 w3-center w3-black" id="home">
-    <h1 class="w3-jumbo">Umfrage Verwaltung</h1>
+  <header class="hero-header w3-center">
+    <h1>Umfrage Verwaltung</h1>
+    <p class="w3-text-muted">Hier können Sie neue Umfragen starten oder Ergebnisse einsehen.</p>
   </header>
 
-  <center>
-    <?php echo $msg; ?>
-    <?php if ($hasUmfrage): ?>
-      <h2 class='w3-xxlarge'>Aktuell: Umfrage von <?php echo h($beginnStr); ?> bis <?php echo h($endStr); ?></h2>
-    <?php else: ?>
-      <h2 class='w3-xxlarge'>Aktuell: keine Umfrage</h2>
-    <?php endif; ?>
+  <div class="page-container">
+    <div class="w3-center">
+      <?php echo $msg; ?>
+      <div class="modern-card" style="max-width: 800px; margin: 0 auto 40px auto;">
+        <?php if ($hasUmfrage): ?>
+          <h2 class='w3-text-white'>Aktuell: Umfrage läuft</h2>
+          <p class="w3-text-muted">Von <b><?php echo h($beginnStr); ?></b> bis <b><?php echo h($endStr); ?></b></p>
+        <?php else: ?>
+          <h2 class='w3-text-white'>Keine aktive Umfrage</h2>
+        <?php endif; ?>
 
-    <br><br>
-    
-    <form action='./umfrage.php' method='post'>
-      <label for='beginDate' class='w3-xlarge'>Beginn: </label>
-      <input type='date' id='beginDate' name='beginDate' class='w3-xlarge' required>
-      <label for='endDate' class='w3-xlarge'> Ende: </label>
-      <input type='date' id='endDate' name='endDate' class='w3-xlarge' required>
-      <br><br>
-      <button class='w3-button w3-green w3-padding-large w3-xxlarge' type='submit'>
-        <i class='fa fa-play'></i> Starten
-      </button>
-    </form>
-    
-    <br><br>
+        <div class="w3-padding-32">
+          <h3 class="w3-text-white">Neue Umfrage starten</h3>
+          <form action='./umfrage.php' method='post'>
+             <div class="w3-row-padding">
+                <div class="w3-half">
+                  <label class="w3-text-muted">Beginn:</label>
+                  <input type='date' name='beginDate' required style="margin-top:5px;">
+                </div>
+                <div class="w3-half">
+                  <label class="w3-text-muted">Ende:</label>
+                  <input type='date' name='endDate' required style="margin-top:5px;">
+                </div>
+             </div>
+             <br>
+             <button class='modern-btn jumbo' type='submit' style="width:100%">
+                <i class='fa fa-play'></i> Umfrage starten
+             </button>
+          </form>
+          
+          <?php if ($hasUmfrage): ?>
+            <hr class="w3-opacity">
+            <form action='./umfrage.php' method='post'>
+              <button class='modern-btn secondary jumbo' name='stop' type='submit' onclick="return confirm('Sicher? Aktuelle Ergebnisse werden in die Historie geschrieben und dann zurückgesetzt.');" style="width:100%; border-color: #ef4444; color: #ef4444;">
+                <i class='fa fa-stop'></i> Beenden und Auswerten
+              </button>
+            </form>
+          <?php endif; ?>
+        </div>
+      </div>
+    </div>
 
-    <form action='./umfrage.php' method='post'>
-      <button class='w3-button w3-blue w3-padding-large w3-xxlarge' name='stop' type='submit' onclick="return confirm('Sicher? Aktuelle Ergebnisse werden in die Historie geschrieben und dann zurückgesetzt.');">
-        <i class='fa fa-stop'></i> Beenden und Auswerten
-      </button>
-    </form>
-  </center>
+    <?php
+    function renderUmfrageErgebnis($pdo, $art, $title) {
+        echo "<div id='" . strtolower($art) . "' class='modern-card w3-margin-bottom'>";
+        echo "<h2 class='w3-text-white' style='margin-top:0'>Ergebnis " . h($title) . "</h2>";
 
-  <hr>
+        echo "<div class='w3-responsive'>";
+        echo "<table class='modern-table'>";
+        echo "<tr>";
+        echo "<th>Platz</th>";
+        echo "<th>Votes</th>";
+        echo "<th>Kategorie</th>";
+        echo "<th>Speise</th>";
+        echo "</tr>";
 
-  <?php
-  function renderUmfrageErgebnis($pdo, $art, $title, $colorClass, $headerClass) {
-      echo "<div id='" . strtolower($art) . "'>";
-      echo "<header class='w3-container w3-padding-32 w3-center w3-black'>";
-      echo "<h1 class='w3-jumbo'>Ergebnis " . h($title) . "</h1>";
-      echo "</header>";
+        $platz = 1;
+        $stmt = $pdo->prepare("SELECT * FROM ergebnis_umfrage WHERE wunschspeise_art = ? ORDER BY wunschspeise_anzahl DESC, wunschspeise_kategorie ASC");
+        $stmt->execute([$art]);
 
-      echo "<table class='w3-table-all w3-large $colorClass' id='myTable_" . strtolower($art) . "'>";
-      echo "<tr class='$headerClass'>";
-      echo "<th style='width:10%;'>Platz</th>";
-      echo "<th style='width:15%;'>Anzahl</th>";
-      echo "<th style='width:15%;'>Speiseart</th>";
-      echo "<th style='width:15%;'>Kategorie</th>";
-      echo "<th style='width:45%;'>Speise</th>";
-      echo "</tr>";
+        while ($row = $stmt->fetch()) {
+            echo "<tr>";
+            echo "<td><b>" . $platz++ . "</b></td>";
+            echo "<td>" . h($row['wunschspeise_anzahl']) . "</td>";
+            echo "<td>" . h($row['wunschspeise_kategorie']) . "</td>";
+            echo "<td>" . h($row['wunschspeise_name']) . "</td>";
+            echo "</tr>";
+        }
+        echo "</table></div></div>";
+    }
 
-      $platz = 1;
-      $stmt = $pdo->prepare("SELECT * FROM ergebnis_umfrage WHERE wunschspeise_art = ? ORDER BY wunschspeise_anzahl DESC, wunschspeise_kategorie ASC");
-      $stmt->execute([$art]);
+    $tableExists = false;
+    try {
+        $pdo->query("SELECT 1 FROM ergebnis_umfrage LIMIT 1");
+        $tableExists = true;
+    } catch (Exception $e) {}
 
-      while ($row = $stmt->fetch()) {
-          echo "<tr>";
-          echo "<td>" . $platz++ . "</td>";
-          // We remove utf8_encode since the database is already fetching correctly assuming charset was set right
-          echo "<td>" . h($row['wunschspeise_anzahl']) . "</td>";
-          echo "<td>" . h($row['wunschspeise_art']) . "</td>";
-          echo "<td>" . h($row['wunschspeise_kategorie']) . "</td>";
-          echo "<td>" . h($row['wunschspeise_name']) . "</td>";
-          echo "</tr>";
-      }
-      echo "</table><br><br></div>";
-  }
-
-  // Check if ergebnis_umfrage table exists first
-  $tableExists = false;
-  try {
-      $pdo->query("SELECT 1 FROM ergebnis_umfrage LIMIT 1");
-      $tableExists = true;
-  } catch (Exception $e) {}
-
-  if ($tableExists) {
-      renderUmfrageErgebnis($pdo, 'Vollkost', 'Vollkost Wunschspeisen', 'w3-pale-green', 'w3-green');
-      renderUmfrageErgebnis($pdo, 'Vegetarisch', 'Vegetarische Wunschspeisen', 'w3-pale-blue', 'w3-blue');
-  } else {
-      echo "<center><h2 class='w3-xlarge'>Keine Ergebnisse bisher vorhanden.</h2></center>";
-  }
-  ?>
+    if ($tableExists) {
+        renderUmfrageErgebnis($pdo, 'Vollkost', 'Vollkost');
+        renderUmfrageErgebnis($pdo, 'Vegetarisch', 'Vegetarisch');
+    } else {
+        echo "<div class='modern-card w3-center'><h2 class='w3-text-white'>Keine Ergebnisse bisher vorhanden.</h2></div>";
+    }
+    ?>
+  </div>
 
 <?php 
 require_once __DIR__ . '/impressum.php';

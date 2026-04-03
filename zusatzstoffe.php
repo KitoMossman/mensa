@@ -7,10 +7,10 @@ $pdo = Database::getInstance()->getConnection();
 
 $pageTitle = 'Zusatzstoffe';
 $sidebarHtml = '
-  <a href="#" class="w3-bar-item w3-button w3-padding-large w3-black">
+  <a href="#" class="w3-bar-item w3-button w3-padding-large">
     <i class="fa fa-asterisk w3-xxlarge"></i><p>ZUSATZSTOFFE</p>
   </a>
-  <a href="javascript:window.close();" class="w3-bar-item w3-button w3-padding-large w3-hover-black">
+  <a href="javascript:window.close();" class="w3-bar-item w3-button w3-padding-large">
     <i class="fa fa-close w3-xxlarge"></i><p>SCHLIESSEN</p>
   </a>
 ';
@@ -22,26 +22,31 @@ $navbarSmallHtml = '
 require __DIR__ . '/templates/header.php';
 ?>
 
-  <header class="w3-container w3-padding-32 w3-center w3-black" id="home">
-    <h1 class="w3-jumbo">Zusatzstoffe</h1>
+  <header class="hero-header w3-center">
+    <h1>Zusatzstoffe</h1>
+    <p class="w3-text-muted">Übersicht der kennzeichnungspflichtigen Inhaltsstoffe.</p>
   </header>
 
-  <div class="w3-responsive">
-    <table class="w3-table-all w3-large w3-text-black">
-      <tr class="w3-green">
-        <th>Nummer</th>
-        <th>Zusatzstoff</th>
-      </tr>
-      <?php
-      $stmt = $pdo->query("SELECT * FROM zusatzstoffe ORDER BY zusatzstoff_nr");
-      while ($row = $stmt->fetch()) {
-          echo "<tr>";
-          echo "<td>" . h($row['zusatzstoff_nr']) . "</td>";
-          echo "<td>" . h($row['bezeichnung']) . "</td>";
-          echo "</tr>";
-      }
-      ?>
-    </table>
+  <div class="page-container">
+    <div class="modern-card">
+      <div class="w3-responsive">
+        <table class="modern-table">
+          <tr>
+            <th>Nr.</th>
+            <th>Bezeichnung</th>
+          </tr>
+          <?php
+          $stmt = $pdo->query("SELECT * FROM zusatzstoffe ORDER BY zusatzstoff_nr");
+          while ($row = $stmt->fetch()) {
+              echo "<tr>";
+              echo "<td><b>" . h($row['zusatzstoff_nr']) . "</b></td>";
+              echo "<td>" . h($row['bezeichnung']) . "</td>";
+              echo "</tr>";
+          }
+          ?>
+        </table>
+      </div>
+    </div>
   </div>
 
 <?php 
