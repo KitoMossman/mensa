@@ -63,8 +63,8 @@ h2 {
 
 /* Layout - narrow sidebar 80px */
 .modern-sidebar {
-  width: 80px !important;
-  min-width: 80px !important;
+  width: 100px !important;
+  min-width: 100px !important;
   position: fixed !important;
   left: 0;
   top: 0;

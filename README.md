@@ -13,17 +13,18 @@ Das System wurde grundlegend überarbeitet, um eine zeitgemäße Benutzererfahru
    * **Responsive Mobile Navbar:** Eine kompakte Top-Navigation für Smartphones.
    * **Screen-Fit:** Kompakte Tabellen und Karten sorgen dafür, dass der wöchentliche Speiseplan auf den meisten Bildschirmen ohne Scrollen sichtbar ist.
 4. **Visuelles Farbleitsystem:** Die Speiseplan-Kategorien (Vollkost, Leichte Vollkost, Vegetarisch) sind farblich dezent hinterlegt, um die Lesbarkeit zu erhöhen.
-5. **Globaler Footer:** Das Impressum ist nun als dezenter Footer unter jedem Tab erreichbar, was die Navigation vereinfacht.
+5. **Unified Admin Hub:** Alle administrativen Funktionen (Nachrichten, Umfragen, Speisen-Datenbank, Pläne) wurden in einem einzigen, mächtigen Dashboard (`login.php`) konsolidiert.
+6. **Barrierefreie Typografie:** Optimierte Kontrastwerte und leuchtende Akzente sorgen für eine hervorragende Lesbarkeit auf allen Hintergrund-Typen.
 
 ---
 
 ## Setup & Installation
 
 1. **Datenbank**: Importiere die Dateistruktur via `mesa.sql` in einen MySQL/MariaDB Server.
-   *(Hinweis: Beim allerersten Aufruf aktualisiert das Backend die Struktur der `nachrichten` Tabelle dynamisch).*
+   *(Hinweis: Das System führt automatische Struktur-Upgrades beim ersten Start durch).*
 2. **Konfiguration**: Passe die Zugangsdaten in `config/config.php` an.
 3. **Webserver**: Lade das Projekt in den `htdocs` Ordner deines Webservers (z. B. XAMPP oder MAMP) und rufe `index.php` auf.
-4. **Login**: Der Login für die Küche erfolgt über den Tab "LOGIN" in der Sidebar.
+4. **Admin-Login**: Der Zugang für das Personal erfolgt über den Tab **"LOGIN"** in der Sidebar. Nach erfolgreicher Anmeldung steht das zentrale **Dashboard** zur Verfügung.
 
 ---
 
@@ -34,9 +35,10 @@ Das Projekt setzt auf eine strikte Trennung von Geschäftslogik und Design sowie
 ### 1. Modulare Struktur
 
 * **`config/config.php`**: Zentrale Datenbank-Konfiguration.
-* **`includes/Database.php`**: PDO-basierte Datenbankverbindung (Singleton).
-* **`includes/functions.php`**: Helper-Funktionen (XSS-Schutz via `h()`, Session-Management).
+* **`includes/Database.php`**: PDO-basierte Datenbankverbindung (Singleton-Pattern).
+* **`includes/functions.php`**: Zentrale Logik & Helper (XSS-Schutz via `h()`, intelligente Speisen-Formatierung via `formatMealName()`).
 * **`templates/header.php` & `templates/footer.php`**: Zentrale Verwaltung der Seitenstruktur und Assets.
+* **`login.php`**: Der konsolidierte Administrations-Hub (ersetzt separate Seiten für Nachrichten und Umfragen).
 * **`style.css`**: Umfassendes Design-System, das auf `w3.css` aufbaut, dieses aber für den modernen Look vollständig überschreibt.
 
 ### 2. Sicherheit & Datenschutz
@@ -46,11 +48,11 @@ Das Projekt setzt auf eine strikte Trennung von Geschäftslogik und Design sowie
 * **XSS-Schutz**: Sämtliche Benutzerausgaben werden konsequent über die `h()`-Funktion maskiert.
 * **Anonymität**: Das Nachrichtensystem arbeitet ohne personenbezogene Daten; die Zuordnung erfolgt ausschließlich über Ticket-IDs und Geheimwörter.
 
-### 3. Anonymes Ticketsystem (integriert in `index.php` / `nachrichten.php`)
+### 3. Anonymes Ticketsystem (integriert)
 
 Ein ticket-basiertes System ermöglicht die Kommunikation mit der Küche (z. B. für Sonderkost-Anfragen):
 
 * Nutzer generieren beim Senden einer Nachricht eine **Ticket-ID** und ein Wort-basiertes **Geheimwort**.
-* Die Küche antwortet im Admin-Dashboard (`nachrichten.php`).
-* Nutzer können die Antwort anonym über den Tab **"ANTWORT"** in der `index.php` abrufen und eine einmalige Rückantwort senden.
+* Die Küche beantwortet Anfragen direkt im Admin-Dashboard (`login.php#nachrichten`).
+* Nutzer können Antworten anonym über den Tab **"ANTWORT"** in der `index.php` abrufen und eine einmalige Rückantwort senden.
 * Sobald die Kommunikation abgeschlossen ist, kann die Küche das Ticket im Admin-Bereich vollständig löschen.

@@ -77,7 +77,7 @@ if (!isAdminLoggedIn() && isset($_POST['loginname'], $_POST['passwort'])) {
     if ($user !== false && password_verify($_POST['passwort'], $user['passwort'])) {
         $_SESSION['admin'] = true;
         // Optional redirect to avoid resubmission
-        redirect('./login.php');
+        redirect('./login.php#auswertung');
     } else {
         $loginMessage = "Bitte Name und Passwort korrekt eingeben";
     }

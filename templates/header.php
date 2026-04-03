@@ -43,7 +43,7 @@ if (!isset($pageTitle)) {
 <div id="main">
 
 <script>
-function openTab(tabId, event) {
+function openTab(tabId, event, scrollTargetId) {
   if (event) {
     event.preventDefault();
   }
@@ -61,25 +61,44 @@ function openTab(tabId, event) {
     tablinks[i].classList.remove("active");
   }
 
-  // Show the current tab, and add an "active" class to the link that opened the tab
+  // Show the current tab
   var targetTab = document.getElementById(tabId);
   if (targetTab) {
     targetTab.classList.add("active");
-    // Explicitly scroll to top
-    window.scrollTo(0, 0);
+    // Default scroll to top if no target specificied
+    if (!scrollTargetId) window.scrollTo(0, 0);
+  }
+
+  // Handle Internal Section Scroll
+  if (scrollTargetId) {
+    var sectionTarget = document.getElementById(scrollTargetId);
+    if (sectionTarget) {
+      setTimeout(function() {
+         sectionTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
   }
 
   // Add active class to corresponding sidebar/navbar items
+  // We match by the tabId primarily
   var links = document.querySelectorAll('a[onclick*="openTab(\'' + tabId + '\'"]');
   links.forEach(function(link) {
-    link.classList.add("active");
+    // If we have a scroll target, only match links that mention it
+    if (scrollTargetId) {
+       if (link.getAttribute('onclick').indexOf(scrollTargetId) !== -1) {
+          link.classList.add("active");
+       }
+    } else {
+       link.classList.add("active");
+    }
   });
 
   // Update URL hash without jumping
+  var hash = scrollTargetId ? tabId + '-' + scrollTargetId : tabId;
   if (history.pushState) {
-    history.pushState(null, null, '#' + tabId);
+    history.pushState(null, null, '#' + hash);
   } else {
-    location.hash = '#' + tabId;
+    location.hash = '#' + hash;
   }
 }
 
@@ -87,7 +106,12 @@ function openTab(tabId, event) {
 window.addEventListener('load', function() {
   var hash = window.location.hash.substring(1);
   if (hash) {
-    openTab(hash);
+    var parts = hash.split('-');
+    if (parts.length > 1) {
+      openTab(parts[0], null, parts[1]);
+    } else {
+      openTab(parts[0]);
+    }
   } else {
     // Default to the first available tab-content
     var firstTab = document.querySelector('.tab-content');
@@ -99,6 +123,13 @@ window.addEventListener('load', function() {
 
 window.addEventListener('hashchange', function() {
   var hash = window.location.hash.substring(1);
-  if (hash) openTab(hash);
+  if (hash) {
+    var parts = hash.split('-');
+    if (parts.length > 1) {
+      openTab(parts[0], null, parts[1]);
+    } else {
+      openTab(parts[0]);
+    }
+  }
 });
 </script>
