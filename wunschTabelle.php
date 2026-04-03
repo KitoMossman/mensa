@@ -73,7 +73,7 @@ require __DIR__ . '/templates/header.php';
         </div>
     <?php else: ?>
       <div class="modern-card" style="max-width: 600px; margin: 0 auto;">
-        <h2 class="w3-text-white" style="margin-top:0">Neuer Vorschlag</h2>
+        <h2 style="margin-top:0">Neuer Vorschlag</h2>
         <form action='./wunschTabelle.php#eingabe' method='post'>
           <p><input type='text' placeholder='Speise (z.B. Schnitzel)' name='name' required></p>
           <p>
@@ -121,7 +121,7 @@ require __DIR__ . '/templates/header.php';
 
   <div class="page-container">
     <div class="modern-card">
-      <h2 class="w3-text-white" style="margin-top:0">Abstimmung Vollkost</h2>
+      <h2 style="margin-top:0">Abstimmung Vollkost</h2>
       <div class="w3-margin-bottom">
         <input type="text" id="myInput" onkeyup="myFunction('myInput', 'myTable')" placeholder="Liste durchsuchen..." style="max-width: 400px;">
       </div>
@@ -178,7 +178,7 @@ require __DIR__ . '/templates/header.php';
 
   <div class="page-container">
     <div class="modern-card">
-      <h2 class="w3-text-white" style="margin-top:0">Abstimmung Vegetarisch</h2>
+      <h2 style="margin-top:0">Abstimmung Vegetarisch</h2>
       <div class="w3-margin-bottom">
         <input type="text" id="myInput2" onkeyup="myFunction('myInput2', 'myTable2')" placeholder="Liste durchsuchen..." style="max-width: 400px;">
       </div>

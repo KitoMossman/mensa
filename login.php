@@ -135,7 +135,7 @@ require __DIR__ . '/templates/header.php';
 
   <div class="page-container">
     <div class="modern-card">
-      <h2 class="w3-text-white" style="margin-top:0">Aktuelle Auswertung</h2>
+      <h2 style="margin-top:0">Aktuelle Auswertung</h2>
       <div class="w3-responsive">
         <table class="modern-table">
           <tr>

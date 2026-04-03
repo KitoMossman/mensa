@@ -348,7 +348,7 @@ require __DIR__ . '/templates/header.php';
 
     <div class="page-container">
       <div class="modern-card">
-        <h2 class="w3-text-white" style="margin-top:0">Nachricht schreiben</h2>
+        <h2 style="margin-top:0">Nachricht schreiben</h2>
         <p class="w3-text-muted">Teilnehmer mit Sonderkost können am Freitag von 10:00 bis 10:30 Uhr zur Sprechstunde zur Küche kommen.</p>
         <hr class="w3-opacity">
 
@@ -403,7 +403,7 @@ require __DIR__ . '/templates/header.php';
 
       <?php if ($abrMessageRecord): ?>
         <div class="modern-card">
-          <h2 class="w3-text-white" style="margin-top:0">Ticket: <?php echo h($abrMessageRecord['ticket_id']); ?></h2>
+          <h2 style="margin-top:0">Ticket: <?php echo h($abrMessageRecord['ticket_id']); ?></h2>
           <?php if (!empty($abrMessageRecord['erstellt_am'])): ?>
               <p class="w3-text-muted">Erstellt am: <?php echo h((new DateTime($abrMessageRecord['erstellt_am']))->format('d.m.Y H:i')); ?> Uhr</p>
           <?php else: ?>
@@ -450,7 +450,7 @@ require __DIR__ . '/templates/header.php';
       <?php else: ?>
         
         <div class="modern-card" style="max-width: 500px; margin: 0 auto;">
-          <h2 class="w3-text-white" style="margin-top:0">Ticket laden</h2>
+          <h2 style="margin-top:0">Ticket laden</h2>
           <?php if ($abrError): ?>
             <p class="w3-text-red w3-center"><?php echo h($abrError); ?></p>
           <?php endif; ?>
@@ -477,7 +477,7 @@ require __DIR__ . '/templates/header.php';
 
     <div class="page-container">
       <div class="modern-card w3-center" style="max-width: 500px; margin: 0 auto;">
-        <h2 class="w3-text-white" style="margin-top:0">Zutritt nur für Personal</h2>
+        <h2 style="margin-top:0">Zutritt nur für Personal</h2>
         <br>
         
         <?php if (!empty($loginMessage)): ?>

@@ -38,7 +38,6 @@ body.modern-dark {
 }
 
 h1,
-h2,
 h3,
 h4,
 h5,
@@ -47,6 +46,15 @@ h6 {
   font-weight: 600;
   color: #fff;
   letter-spacing: -0.02em;
+}
+
+h2 {
+  font-family: var(--font-family);
+  font-weight: 700;
+  color: #93c5fd; /* Brighter Radiant Blue */
+  text-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+  letter-spacing: -0.01em;
+  margin-top: 0;
 }
 
 /* -------------------------------------
@@ -218,9 +226,13 @@ h6 {
 }
 
 .hero-header h2 {
-  opacity: 0.9;
-  font-size: 1.2rem !important;
+  opacity: 1;
+  font-size: 1.4rem !important;
+  color: #fff; /* High Contrast White for images */
+  text-shadow: 0 0 15px var(--accent-color);
   margin: 0;
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 
 /* Modern Card */
