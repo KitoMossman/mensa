@@ -9,7 +9,7 @@ Das System wurde grundlegend überarbeitet, um eine zeitgemäße Benutzererfahru
 1. **Premium Dark-Mode Design:** Ein konsistentes, dunkles Design mit Glassmorphismus-Effekten, optimierter Typografie (Inter) und hochwertigen UI-Komponenten (`modern-card`, `modern-btn`).
 2. **Dynamisches Tab-System:** Umstellung von einer langen Scroll-Seite auf eine intuitive, Tab-basierte Navigation. Die Tabs werden via JavaScript gesteuert und der Status wird in der URL (`#hash`) für die Browser-Historie gespeichert.
 3. **Optimiertes Layout:**
-   * **Narrow Sidebar:** Eine platzsparende (80px) Seitenleiste für Desktop-Nutzer.
+   * **Narrow Sidebar:** Eine platzsparende (100px) Seitenleiste für Desktop-Nutzer.
    * **Responsive Mobile Navbar:** Eine kompakte Top-Navigation für Smartphones.
    * **Screen-Fit:** Kompakte Tabellen und Karten sorgen dafür, dass der wöchentliche Speiseplan auf den meisten Bildschirmen ohne Scrollen sichtbar ist.
 4. **Visuelles Farbleitsystem:** Die Speiseplan-Kategorien (Vollkost, Leichte Vollkost, Vegetarisch) sind farblich dezent hinterlegt, um die Lesbarkeit zu erhöhen.
