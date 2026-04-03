@@ -411,7 +411,7 @@ require __DIR__ . '/templates/header.php';
                 </div>
                 <div class="w3-row-padding w3-margin-top">
                     <div class="w3-half"><button type="submit" name="load_wunsch" class="modern-btn secondary" style="width:100%"><i class="fa fa-refresh"></i> Aus Wunschplan laden</button></div>
-                    <div class="w3-half"><button type="submit" name="wochenplan_save" class="modern-btn jumbo" style="width:100%"><i class="fa fa-check"></i> Speichern</button></div>
+                    <div class="w3-half"><button type="submit" name="wochenplan_save" class="modern-btn" style="width:100%"><i class="fa fa-check"></i> Speichern</button></div>
                 </div>
             </form>
         </div>
@@ -723,9 +723,14 @@ function loadZSData() {
 .modern-table td { font-size: 14px; }
 .polished thead th { background: rgba(255,255,255,0.03); text-transform: uppercase; letter-spacing: 1px; font-size: 11px; color: #94a3b8; }
 .spacer-row td { height: 12px; border: none !important; }
-.type-badge { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
-.progress-bg { background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; margin-top: 4px; overflow: hidden; }
+.type-badge.col-vk { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
+.type-badge.col-lvk { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+.type-badge.col-veg { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+.progress-bg { background: rgba(255,255,255,0.05); height: 8px; border-radius: 4px; margin-top: 4px; overflow: hidden; }
 .progress-bar { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+.progress-bar.col-vk { background: linear-gradient(90deg, #3b82f6, #60a5fa); box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); }
+.progress-bar.col-lvk { background: linear-gradient(90deg, #10b981, #34d399); box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+.progress-bar.col-veg { background: linear-gradient(90deg, #f59e0b, #fbbf24); box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
 
 /* Form Tables */
 .form-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
