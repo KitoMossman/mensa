@@ -6,12 +6,24 @@ Ein hochmodernes, webbasiertes Mensa-Verwaltungssystem, entwickelt für die effi
 
 Das System wurde grundlegend überarbeitet, um eine erstklassige Benutzererfahrung (UX) und ein zukunftssicheres Interface (UI) zu bieten:
 
+<<<<<<< HEAD
 1.  **Premium Dark-Mode Design:** Ein konsistentes, tiefdunkles Design mit Glassmorphismus-Effekten, optimierter Typografie (**Inter**) und hochwertigen UI-Komponenten (`modern-card`, `modern-btn`).
 2.  **Dynamisches Tab-System:** Umstellung von statischen Unterseiten auf eine flüssige, Tab-basierte Navigation. Der Status wird via JavaScript in der URL (`#hash`) synchronisiert, was die Nutzung der Browser-Historie ermöglicht.
 3.  **Unified Admin Hub (`login.php`):** Alle administrativen Aufgaben wurden in einem zentralen, mächtigen Dashboard konsolidiert. Kein Hin- und Herspringen zwischen Dateien mehr nötig.
 4.  **Anonymes Ticketsystem:** Gäste können Feedback senden und Antworten der Küche über eine anonyme Ticket-ID und ein zufälliges Geheimwort abrufen – ganz ohne Registrierung.
 5.  **Visuelles Farbleitsystem:** Die Speiseplan-Kategorien (Vollkost, Leichte Vollkost, Vegetarisch) sind farblich intuitiv hinterlegt, um die Orientierung auf einen Blick zu erleichtern.
 6.  **Responsive & Mobile First:** Das System ist vollständig adaptiv. Die kompakte Sidebar auf Desktop-Geräten verwandelt sich auf Mobilgeräten in eine platzsparende Top-Navbar.
+=======
+1. **Premium Dark-Mode Design:** Ein konsistentes, dunkles Design mit Glassmorphismus-Effekten, optimierter Typografie (Inter) und hochwertigen UI-Komponenten (`modern-card`, `modern-btn`).
+2. **Dynamisches Tab-System:** Umstellung von einer langen Scroll-Seite auf eine intuitive, Tab-basierte Navigation. Die Tabs werden via JavaScript gesteuert und der Status wird in der URL (`#hash`) für die Browser-Historie gespeichert.
+3. **Optimiertes Layout:**
+   * **Narrow Sidebar:** Eine platzsparende (100px) Seitenleiste für Desktop-Nutzer.
+   * **Responsive Mobile Navbar:** Eine kompakte Top-Navigation für Smartphones.
+   * **Screen-Fit:** Kompakte Tabellen und Karten sorgen dafür, dass der wöchentliche Speiseplan auf den meisten Bildschirmen ohne Scrollen sichtbar ist.
+4. **Visuelles Farbleitsystem:** Die Speiseplan-Kategorien (Vollkost, Leichte Vollkost, Vegetarisch) sind farblich dezent hinterlegt, um die Lesbarkeit zu erhöhen.
+5. **Unified Admin Hub:** Alle administrativen Funktionen (Nachrichten, Umfragen, Speisen-Datenbank, Pläne) wurden in einem einzigen, mächtigen Dashboard (`login.php`) konsolidiert.
+6. **Barrierefreie Typografie:** Optimierte Kontrastwerte und leuchtende Akzente sorgen für eine hervorragende Lesbarkeit auf allen Hintergrund-Typen.
+>>>>>>> 20c067584014d6a3b106f0016e0b2117a77b1257
 
 ---
 
