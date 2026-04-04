@@ -8,14 +8,13 @@ Das System wurde grundlegend überarbeitet, um eine erstklassige Benutzererfahru
 
 1. **Premium Dark-Mode Design:** Ein konsistentes, tiefdunkles Design mit Glassmorphismus-Effekten, optimierter Typografie (**Inter**) und hochwertigen UI-Komponenten (`modern-card`, `modern-btn`).
 2. **Dynamisches Tab-System:** Umstellung von einer langen Scroll-Seite auf eine intuitive, Tab-basierte Navigation. Der Status wird via JavaScript in der URL (`#hash`) synchronisiert, was die Nutzung der Browser-Historie ermöglicht.
-3. **App-Like Mobile Experience ("Perfect Fit"):** Eine speziell für Smartphones (z.B. Pixel 8, iPhone 15) optimierte Vollbild-Ansicht. Edge-to-Edge Design ohne störende Ränder, vertikales Snap-Scrolling und Unterstützung für moderne "Notches" durch Safe-Area-Insets.
+3. **App-Like Mobile Experience ("Perfect Fit"):** Eine speziell für Smartphones (z.B. Pixel 8, iPhone 15) optimierte Vollbild-Ansicht. Edge-to-Edge Design ohne störende Ränder und Unterstützung für moderne "Notches" durch Safe-Area-Insets.
 4. **Unified Admin Hub (`login.php`):** Alle administrativen Aufgaben wurden in einem zentralen Dashboard konsolidiert. Kein Hin- und Herspringen zwischen Dateien mehr nötig.
 5. **Anonymes Ticketsystem:** Gäste können Feedback senden und Antworten der Küche über eine anonyme Ticket-ID und ein zufälliges Geheimwort abrufen – ohne Registrierung.
 6. **Visuelles Farbleitsystem:** Die Speiseplan-Kategorien (Vollkost, Leichte Vollkost, Vegetarisch) sind farblich dezent hinterlegt, um die Orientierung auf einen Blick zu erleichtern.
 7. **Responsive & Mobile First:** Das System ist vollständig adaptiv. Die kompakte Sidebar (100px) auf Desktop-Geräten verwandelt sich auf Mobilgeräten in eine platzsparende Top-Navbar.
 8. **Barrierefreie Typografie:** Optimierte Kontrastwerte und leuchtende Akzente sorgen für eine hervorragende Lesbarkeit auf allen Hintergrund-Typen.
 9. **Screen-Fit Design:** Kompakte Tabellen und Karten sorgen dafür, dass der wöchentliche Speiseplan auf den meisten Bildschirmen ohne Scrollen sichtbar ist.
-10. **Vertical Snap Navigation:** Ein intuitives "Ein Tag pro Bildschirm" System auf Mobile, das versehentliche Browser-Gesten (Swipe-Back) verhindert und das Durchblättern der Woche zum Erlebnis macht.
 
 ---
 
