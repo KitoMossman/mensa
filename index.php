@@ -172,53 +172,85 @@ require __DIR__ . '/templates/header.php';
   </header>
 
   <div class="page-container">
-    <div class="modern-card">
-      <div class="w3-responsive">
-        <table class="modern-table">
-          <tr>
-            <th style="width:15%">Tag</th>
-            <th style="width:28%">Vollkost</th>
-            <th style="width:28%">Leichte Vollkost</th>
-            <th style="width:28%">Vegetarisch</th>
-          </tr>
+    <div class="modern-card meal-card-container">
+      <div class="meal-plan-scroll-wrapper">
+        <table class="modern-table meal-plan-table">
+          <thead>
+            <tr>
+              <th style="width:15%">Tag</th>
+              <th style="width:28%">Vollkost</th>
+              <th style="width:28%">Leichte Vollkost</th>
+              <th style="width:28%">Vegetarisch</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php
+            $tage = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
+            $currentDayIndexMap = ["Monday" => 0, "Tuesday" => 1, "Wednesday" => 2, "Thursday" => 3, "Friday" => 4, "Saturday" => 5, "Sunday" => 6];
+            $todayName = date("l");
+            $todayIndex = $currentDayIndexMap[$todayName] ?? -1;
 
-        <?php
-        $tage = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
-        
-        $stmtWochen = $pdo->prepare("SELECT speisen.speise_name, speisen.speise_art 
-                                     FROM wochenplan 
-                                     JOIN speisen ON wochenplan.speise_nr = speisen.speise_nr 
-                                     WHERE wochenplan.tag = ?");
-        
-        foreach ($tage as $tag) {
-            $vollkost = "";
-            $leichteVollkost = "";
-            $vegetarisch = "";
+            $stmtWochen = $pdo->prepare("SELECT speisen.speise_name, speisen.speise_art 
+                                         FROM wochenplan 
+                                         JOIN speisen ON wochenplan.speise_nr = speisen.speise_nr 
+                                         WHERE wochenplan.tag = ?");
             
-            $stmtWochen->execute([$tag]);
-            while ($row = $stmtWochen->fetch()) {
-                if ($row['speise_art'] == 'Vollkost') $vollkost = $row['speise_name'];
-                if ($row['speise_art'] == 'Leichte Vollkost') $leichteVollkost = $row['speise_name'];
-                if ($row['speise_art'] == 'Vegetarisch') $vegetarisch = $row['speise_name'];
+            foreach ($tage as $index => $tag) {
+                $vollkost = "";
+                $leichteVollkost = "";
+                $vegetarisch = "";
+                
+                $stmtWochen->execute([$tag]);
+                while ($row = $stmtWochen->fetch()) {
+                    if ($row['speise_art'] == 'Vollkost') $vollkost = $row['speise_name'];
+                    if ($row['speise_art'] == 'Leichte Vollkost') $leichteVollkost = $row['speise_name'];
+                    if ($row['speise_art'] == 'Vegetarisch') $vegetarisch = $row['speise_name'];
+                }
+                
+                $isTodayClass = ($index === $todayIndex) ? "is-today" : "";
+                echo "<tr class='meal-day-row $isTodayClass' data-day-index='$index'>";
+                echo "<td class='day-name'><b>" . h($tag) . "</b>" . ($index === $todayIndex ? " <span class='today-badge'>Heute</span>" : "") . "</td>";
+                echo "<td class='col-vk' data-label='Vollkost'>" . formatMealName($vollkost) . "</td>";
+                echo "<td class='col-lvk' data-label='Leichte Vollkost'>" . formatMealName($leichteVollkost) . "</td>";
+                echo "<td class='col-veg' data-label='Vegetarisch'>" . formatMealName($vegetarisch) . "</td>";
+                echo "</tr>";
             }
-            
-            echo "<tr>";
-            echo "<td><b>" . h($tag) . "</b></td>";
-            echo "<td class='col-vk'>" . formatMealName($vollkost) . "</td>";
-            echo "<td class='col-lvk'>" . formatMealName($leichteVollkost) . "</td>";
-            echo "<td class='col-veg'>" . formatMealName($vegetarisch) . "</td>";
-            echo "</tr>";
-        }
-        ?>
+            ?>
+          </tbody>
         </table>
       </div>
 
-      <div class="w3-center" style="margin-top: 30px;">
+      <div class="w3-center desktop-only" style="margin-top: 30px;">
         <a href="./zusatzstoffe.php" class="modern-btn secondary" target="_blank">
           <i class="fa fa-asterisk"></i> Zusatzstoffe
         </a>
       </div>
     </div>
+
+    <script>
+    // Scroll to current day on mobile
+    function scrollToToday() {
+        if (window.innerWidth <= 600) {
+            const scrollWrapper = document.querySelector('.meal-plan-scroll-wrapper');
+            const todayRow = document.querySelector('.meal-day-row.is-today');
+            
+            if (scrollWrapper && todayRow) {
+                // Use a small timeout to ensure the browser has finished layout calculations
+                setTimeout(() => {
+                    todayRow.scrollIntoView({ 
+                        behavior: 'auto', 
+                        block: 'start', // Start of the card aligns with start of scroll area
+                        inline: 'nearest' 
+                    });
+                }, 150);
+            }
+        }
+    }
+
+    // Run on load and orientation changes
+    window.addEventListener('load', scrollToToday);
+    window.addEventListener('resize', scrollToToday);
+    </script>
   </div>
 </div>
 

@@ -9,5 +9,10 @@
     <p><i class="fa fa-user-plus fa-fw w3-text-white w3-xxlarge w3-margin-right"> </i>Vorentwickler: Steven Haufe und Max Schneider (Gruppe ITSE2007)</p>
     <p><i class="fa fa-envelope fa-fw w3-text-white w3-xxlarge w3-margin-right"> </i>Email: info.maki@qualifizierung.bfw-dresden.de</p>
     <p><i class="fa fa-github fa-fw w3-text-white w3-xxlarge w3-margin-right"> </i>Projekt veröffentlicht unter: <a href="https://github.com/KitoMossman/mensa">/KitoMossman/mensa</a></p> 
+    
+    <hr class="w3-opacity">
+    <p class="w3-medium w3-center">
+      Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank" class="w3-hover-text-green">w3.css</a>
+    </p>
   </div><br>
 </div>
