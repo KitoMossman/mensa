@@ -765,3 +765,41 @@ hr.w3-opacity {
   height: 18px;
   accent-color: var(--accent-color);
 }
+
+/* -------------------------------------
+ *  SURVEY FLASHING ANIMATION
+ * ------------------------------------- */
+@keyframes survey-pulse {
+  0% { background-color: var(--danger-color); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70% { background-color: #dc2626; box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  100% { background-color: var(--danger-color); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.survey-btn-flashing {
+  animation: survey-pulse 2s infinite !important;
+  color: white !important;
+  border-left: 3px solid #fff !important;
+}
+
+.custom-survey-red, .custom-survey-red i, .custom-survey-red p {
+  color: #ff4d4d !important;
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.4) !important;
+}
+
+.survey-btn-flashing i, .survey-btn-flashing p {
+  color: white !important;
+  text-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+.survey-nav-item {
+  color: #ff8080 !important; /* Soft red for readability */
+}
+
+.survey-nav-item i {
+  color: #ef4444 !important; /* Vivid red for icons */
+}
+
+.survey-nav-item:hover {
+  color: #ff4d4d !important;
+  border-left: 3px solid #ef4444 !important;
+}

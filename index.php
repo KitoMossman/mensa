@@ -23,6 +23,33 @@ try {
                     ADD COLUMN abgerufen_am DATETIME NULL, 
                     ADD COLUMN nutzer_rueckantwort TEXT NULL");
     }
+
+    // --- CUSTOM SURVEY MIGRATION ---
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS custom_surveys (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            is_active TINYINT(1) DEFAULT 0,
+            beginn DATE,
+            ende DATE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+        CREATE TABLE IF NOT EXISTS survey_questions (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            survey_id INT NOT NULL,
+            question_text TEXT NOT NULL,
+            type ENUM('radio', 'checkbox') DEFAULT 'radio',
+            FOREIGN KEY (survey_id) REFERENCES custom_surveys(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+        CREATE TABLE IF NOT EXISTS survey_options (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            question_id INT NOT NULL,
+            option_text TEXT NOT NULL,
+            votes INT DEFAULT 0,
+            FOREIGN KEY (question_id) REFERENCES survey_questions(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ");
 } catch (Exception $e) {}
 // ----------------------------------------
 
@@ -64,6 +91,62 @@ if (isset($_POST['thema']) && isset($_POST['nachricht'])) {
     } else {
         $contactIsError = true;
         $contactMessage = "Es gab ein Problem beim Senden der Nachricht.";
+    }
+}
+
+// --- Survey Handling (Integrated from wunschTabelle.php) ---
+$surveySuccessMsg = "";
+if (isset($_POST['wunschauswahl']) && !isset($_SESSION['wunschauswahl'])) {
+    $stmt = $pdo->prepare("UPDATE wunschspeisen SET wunschspeise_anzahl = wunschspeise_anzahl + 1 WHERE wunschspeise_nr = ?");
+    if ($stmt->execute([$_POST['wunschauswahl']])) {
+        $_SESSION['wunschauswahl'] = $_POST['wunschauswahl'];
+        $surveySuccessMsg = "Vielen Dank für Deine Stimme!";
+    }
+}
+if (isset($_POST['wunschauswahl_leichte']) && !isset($_SESSION['wunschauswahl_leichte'])) {
+    $stmt = $pdo->prepare("UPDATE wunschspeisen SET wunschspeise_anzahl = wunschspeise_anzahl + 1 WHERE wunschspeise_nr = ?");
+    if ($stmt->execute([$_POST['wunschauswahl_leichte']])) {
+        $_SESSION['wunschauswahl_leichte'] = $_POST['wunschauswahl_leichte'];
+        $surveySuccessMsg = "Vielen Dank für Deine Stimme!";
+    }
+}
+if (isset($_POST['wunschauswahl2']) && !isset($_SESSION['wunschauswahl2'])) {
+    $stmt = $pdo->prepare("UPDATE wunschspeisen SET wunschspeise_anzahl = wunschspeise_anzahl + 1 WHERE wunschspeise_nr = ?");
+    if ($stmt->execute([$_POST['wunschauswahl2']])) {
+        $_SESSION['wunschauswahl2'] = $_POST['wunschauswahl2'];
+        $surveySuccessMsg = "Vielen Dank für Deine Stimme!";
+    }
+}
+
+// --- CUSTOM SURVEY LOGIC ---
+$activeCustomSurvey = null;
+$stmtCS = $pdo->query("SELECT * FROM custom_surveys WHERE is_active = 1 AND beginn <= CURDATE() AND ende >= CURDATE() LIMIT 1");
+if ($activeCustomSurvey = $stmtCS->fetch()) {
+    $csId = $activeCustomSurvey['id'];
+    $sessionKey = "survey_voted_" . $csId;
+}
+
+if (isset($_POST['submit_custom_survey']) && $activeCustomSurvey) {
+    if (!isset($_SESSION[$sessionKey])) {
+        if (isset($_POST['q']) && is_array($_POST['q'])) {
+            foreach ($_POST['q'] as $qId => $answers) {
+                if (!is_array($answers)) $answers = [$answers];
+                foreach ($answers as $oId) {
+                    $stmtVote = $pdo->prepare("UPDATE survey_options SET votes = votes + 1 WHERE id = ? AND question_id = ?");
+                    $stmtVote->execute([(int)$oId, (int)$qId]);
+                }
+            }
+            $_SESSION[$sessionKey] = true;
+            $surveySuccessMsg = "Vielen Dank für Ihre Teilnahme!";
+        }
+    }
+}
+// ---------------------------
+if (isset($_POST['sm_name'], $_POST['sm_beilage'], $_POST['sm_art'], $_POST['sm_kategorie'])) {
+    $neueSpeiseName = trim($_POST['sm_name']) . " mit " . trim($_POST['sm_beilage']);
+    $stmt = $pdo->prepare("INSERT INTO wunschspeisen (wunschspeise_name, wunschspeise_art, wunschspeise_kategorie, wunschspeise_anzahl) VALUES (?, ?, ?, 0)");
+    if ($stmt->execute([$neueSpeiseName, $_POST['sm_art'], $_POST['sm_kategorie']])) {
+        $surveySuccessMsg = "Vielen Dank für Deinen Vorschlag!";
     }
 }
 
@@ -116,8 +199,64 @@ if (isset($_POST['ticket_id'], $_POST['geheimwort'])) {
     }
 }
 
+// Check for active survey
+$isSurveyActive = false;
+$stmtSurvey = $pdo->query("SELECT * FROM umfrage LIMIT 1");
+if ($umRow = $stmtSurvey->fetch()) {
+    $now = new DateTime();
+    if ($now >= new DateTime($umRow['beginn']) && $now <= new DateTime($umRow['ende'])) {
+        $isSurveyActive = true;
+    }
+}
+
 // Prepare Sidebar HTML
-$sidebarHtml = '
+$surveySidebar = '';
+$surveyNavbar = '';
+
+// 1. Wunschspeisen-Umfrage Items
+if ($isSurveyActive) {
+    $surveySidebar .= '
+      <a href="javascript:void(0)" onclick="openTab(\'umfrage_eingabe\', event)" class="w3-bar-item w3-button w3-padding-large survey-btn-flashing survey-nav-item">
+        <i class="fa fa-pencil w3-xxlarge"></i><p>VORSCHLAG</p>
+      </a>
+      <a href="javascript:void(0)" onclick="openTab(\'umfrage_vollkost\', event)" class="w3-bar-item w3-button w3-padding-large survey-nav-item">
+        <i class="fa fa-cutlery w3-xlarge"></i><p style="font-size:10px; margin-top:-5px;">TOP VOLLK.</p>
+      </a>
+      <a href="javascript:void(0)" onclick="openTab(\'umfrage_leichte\', event)" class="w3-bar-item w3-button w3-padding-large survey-nav-item">
+        <i class="fa fa-cutlery w3-xlarge"></i><p style="font-size:10px; margin-top:-5px;">TOP LEICHT</p>
+      </a>
+      <a href="javascript:void(0)" onclick="openTab(\'umfrage_vegetarisch\', event)" class="w3-bar-item w3-button w3-padding-large survey-nav-item">
+        <i class="fa fa-leaf w3-xlarge"></i><p style="font-size:10px; margin-top:-5px;">TOP VEGI</p>
+      </a>';
+    $surveyNavbar .= '
+      <a href="javascript:void(0)" onclick="openTab(\'umfrage_eingabe\', event)" class="w3-bar-item w3-button survey-btn-flashing survey-nav-item" style="width:20% !important; border:none; font-size:10px; padding:8px 0;">NEU</a>
+      <a href="javascript:void(0)" onclick="openTab(\'umfrage_vollkost\', event)" class="w3-bar-item w3-button survey-nav-item" style="width:20% !important; font-size:10px; padding:8px 0;">VOLL</a>
+      <a href="javascript:void(0)" onclick="openTab(\'umfrage_leichte\', event)" class="w3-bar-item w3-button survey-nav-item" style="width:20% !important; font-size:10px; padding:8px 0;">L-VOLL</a>
+      <a href="javascript:void(0)" onclick="openTab(\'umfrage_vegetarisch\', event)" class="w3-bar-item w3-button survey-nav-item" style="width:20% !important; font-size:10px; padding:8px 0;">VEGI</a>';
+}
+
+// 2. Custom FRAGEN Items (Independent)
+if ($activeCustomSurvey) {
+    $btnCount = ($isSurveyActive ? 5 : 1);
+    $w = round(100 / $btnCount, 1) . '%';
+    
+    $surveySidebar = '
+      <a href="javascript:void(0)" onclick="openTab(\'umfrage_fragen\', event)" class="w3-bar-item w3-button w3-padding-large survey-btn-flashing survey-nav-item custom-survey-red">
+        <i class="fa fa-question-circle w3-xxlarge"></i><p>FRAGEN</p>
+      </a>' . $surveySidebar;
+    $surveyNavbar = '
+      <a href="javascript:void(0)" onclick="openTab(\'umfrage_fragen\', event)" class="w3-bar-item w3-button survey-btn-flashing survey-nav-item custom-survey-red" style="width:'.$w.' !important; font-size:10px; padding:8px 0;">FRAGEN</a>' . $surveyNavbar;
+    
+    // Adjust width of previous buttons if both active
+    if ($isSurveyActive) {
+        $surveyNavbar = str_replace('width:20% !important', 'width:20% !important', $surveyNavbar); 
+        // 20% is correct for 5 buttons.
+    } else {
+        $surveyNavbar = str_replace('width:20% !important', 'width:100% !important', $surveyNavbar);
+    }
+}
+
+$sidebarHtml_default = '
   <a href="javascript:void(0)" onclick="openTab(\'home\', event)" class="w3-bar-item w3-button w3-padding-large">
     <i class="fa fa-star w3-xxlarge"></i><p>SPEISEPLAN</p>
   </a>
@@ -134,17 +273,21 @@ $sidebarHtml = '
     <i class="fa fa-unlock w3-xxlarge"></i><p>LOGIN</p>
   </a>
 ';
-$navbarSmallHtml = '
+$sidebarHtml = $surveySidebar . $sidebarHtml_default;
+
+$navbarSmallHtml_default = '
     <a href="javascript:void(0)" onclick="openTab(\'home\', event)" class="w3-bar-item w3-button" style="width:20% !important">MENSA</a>
     <a href="javascript:void(0)" onclick="openTab(\'abstimmung\', event)" class="w3-bar-item w3-button" style="width:20% !important">WAHL</a>
     <a href="javascript:void(0)" onclick="openTab(\'kontakt\', event)" class="w3-bar-item w3-button" style="width:20% !important">KONTAKT</a>
     <a href="javascript:void(0)" onclick="openTab(\'abrufen\', event)" class="w3-bar-item w3-button" style="width:20% !important">ANTWORT</a>
     <a href="javascript:void(0)" onclick="openTab(\'login\', event)" class="w3-bar-item w3-button" style="width:20% !important">LOGIN</a>
 ';
+$navbarSmallHtml = (($isSurveyActive || $activeCustomSurvey) ? $surveyNavbar : $navbarSmallHtml_default);
 
 $pageTitle = 'Mensaplan';
 require __DIR__ . '/templates/header.php';
 ?>
+
 
 <div id="home" class="tab-content active">
   <!-- Header/Home -->
@@ -347,6 +490,253 @@ require __DIR__ . '/templates/header.php';
     </div>
   </div>
 
+<!-- Tab: UMFRAGE EINGABE -->
+<div id="umfrage_eingabe" class="tab-content">
+  <header class="hero-header w3-center">
+    <h1>Wunschspeise einreichen</h1>
+    <p class="w3-text-muted">Habt Ihr eine Idee für den Speiseplan? Schickt sie uns!</p>
+  </header>
+  <div class="page-container">
+    <?php if ($surveySuccessMsg): ?>
+        <div class="modern-card w3-center">
+          <h1 class='w3-jumbo w3-text-green'><?php echo $surveySuccessMsg; ?></h1>
+          <br>
+          <a href="javascript:void(0)" onclick="openTab('umfrage_eingabe', event)" class="modern-btn secondary">Weiteren Vorschlag senden</a>
+        </div>
+    <?php else: ?>
+      <div class="modern-card" style="max-width: 600px; margin: 0 auto;">
+        <h2 style="margin-top:0">Neuer Vorschlag</h2>
+        <form action='./index.php?#umfrage_eingabe' method='post'>
+          <p><input type='text' placeholder='Speise (z.B. Schnitzel)' name='sm_name' required></p>
+          <p>
+            <select name='sm_beilage' required>
+              <option value='' disabled selected>Beilage wählen</option>
+              <?php
+              $pbeilagen = $pdo->query("SELECT * FROM beilagen ORDER BY beilage_art, beilage_name");
+              while ($row = $pbeilagen->fetch()) {
+                  echo "<option value='" . h($row['beilage_name']) . "'>" . h($row['beilage_art']) . " - " . h($row['beilage_name']) . "</option>";
+              }
+              ?>
+            </select>
+          </p>
+          <p>
+            <select name='sm_art' required>
+              <option value='' disabled selected>Speiseart wählen</option>
+              <option value='Vollkost'>Vollkost</option>
+              <option value='Leichte Vollkost'>Leichte Vollkost</option>
+              <option value='Vegetarisch'>Vegetarisch</option>
+            </select>
+          </p>
+          <p>
+            <select name='sm_kategorie' required>
+              <option value='' disabled selected>Kategorie wählen</option>
+              <option value='-'>-</option>
+              <option value='Fleisch'>Fleisch</option>
+              <option value='Fisch'>Fisch</option>
+              <option value='Süßes'>Süßes</option>
+            </select>
+          </p>
+          <br>
+          <button class='modern-btn jumbo' type='submit' style="width:100%">
+            <i class='fa fa-paper-plane'></i> Vorschlag abschicken
+          </button>
+        </form>
+      </div>
+    <?php endif; ?>
+  </div>
+</div>
+
+<!-- Tab: UMFRAGE VOLLKOST -->
+<div id="umfrage_vollkost" class="tab-content">
+  <header class="hero-header w3-center">
+    <h1>Top-Vorschläge: Vollkost</h1>
+    <p class="w3-text-muted">Stimme für Deinen Favoriten ab.</p>
+  </header>
+  <div class="page-container">
+    <div class="modern-card">
+      <?php if ($surveySuccessMsg) echo "<div class='w3-panel w3-green w3-round w3-margin-bottom'><p>$surveySuccessMsg</p></div>"; ?>
+      <div class="w3-margin-bottom">
+        <input type="text" onkeyup="filterSurveyTable(this, 'table_vk')" placeholder="Suchen..." style="max-width: 400px;">
+      </div>
+      <form action="./index.php?#umfrage_vollkost" method="post">
+        <div class="w3-responsive">
+          <table class="modern-table" id="table_vk">
+            <tr><th style="width:5%;">#</th><th style="width:10%; text-align:center;">Wahl</th><th style="width:10%;">Votes</th><th style="width:15%;">Kat.</th><th style="width:50%;">Speise</th></tr>
+            <?php
+            $p = 1;
+            $stmt = $pdo->query("SELECT * FROM wunschspeisen WHERE wunschspeise_art='Vollkost' ORDER BY wunschspeise_anzahl DESC, wunschspeise_kategorie ASC");
+            while ($row = $stmt->fetch()) {
+                $dis = isset($_SESSION['wunschauswahl']) ? "disabled" : "";
+                $chk = (isset($_SESSION['wunschauswahl']) && $_SESSION['wunschauswahl'] == $row['wunschspeise_nr']) ? "checked" : "";
+                echo "<tr><td>$p</td><td class='w3-center'><div class='modern-radio-container'><input type='radio' name='wunschauswahl' value='".$row['wunschspeise_nr']."' $dis $chk></div></td><td>".h($row['wunschspeise_anzahl'])."</td><td>".h($row['wunschspeise_kategorie'])."</td><td>".formatMealName($row['wunschspeise_name'])."</td></tr>";
+                $p++;
+            }
+            ?>
+          </table>
+        </div>
+        <br>
+        <?php if (!isset($_SESSION['wunschauswahl'])): ?>
+          <button class='modern-btn jumbo' type='submit' style="width:100%"><i class='fa fa-check'></i> Stimme abgeben</button>
+        <?php else: ?>
+          <div class="w3-panel w3-blue w3-round"><p><i class="fa fa-info-circle"></i> Du hast bereits abgestimmt.</p></div>
+        <?php endif; ?>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Tab: UMFRAGE LEICHTE VOLLKOST -->
+<div id="umfrage_leichte" class="tab-content">
+  <header class="hero-header w3-center">
+    <h1>Top-Vorschläge: Leichte Vollkost</h1>
+    <p class="w3-text-muted">Stimme für Deinen Favoriten ab.</p>
+  </header>
+  <div class="page-container">
+    <div class="modern-card">
+      <?php if ($surveySuccessMsg) echo "<div class='w3-panel w3-green w3-round w3-margin-bottom'><p>$surveySuccessMsg</p></div>"; ?>
+      <div class="w3-margin-bottom">
+        <input type="text" onkeyup="filterSurveyTable(this, 'table_lvk')" placeholder="Suchen..." style="max-width: 400px;">
+      </div>
+      <form action="./index.php?#umfrage_leichte" method="post">
+        <div class="w3-responsive">
+          <table class="modern-table" id="table_lvk">
+            <tr><th style="width:5%;">#</th><th style="width:10%; text-align:center;">Wahl</th><th style="width:10%;">Votes</th><th style="width:15%;">Kat.</th><th style="width:50%;">Speise</th></tr>
+            <?php
+            $p = 1;
+            $stmt = $pdo->query("SELECT * FROM wunschspeisen WHERE wunschspeise_art='Leichte Vollkost' ORDER BY wunschspeise_anzahl DESC, wunschspeise_kategorie ASC");
+            while ($row = $stmt->fetch()) {
+                $dis = isset($_SESSION['wunschauswahl_leichte']) ? "disabled" : "";
+                $chk = (isset($_SESSION['wunschauswahl_leichte']) && $_SESSION['wunschauswahl_leichte'] == $row['wunschspeise_nr']) ? "checked" : "";
+                echo "<tr><td>$p</td><td class='w3-center'><div class='modern-radio-container'><input type='radio' name='wunschauswahl_leichte' value='".$row['wunschspeise_nr']."' $dis $chk></div></td><td>".h($row['wunschspeise_anzahl'])."</td><td>".h($row['wunschspeise_kategorie'])."</td><td>".formatMealName($row['wunschspeise_name'])."</td></tr>";
+                $p++;
+            }
+            ?>
+          </table>
+        </div>
+        <br>
+        <?php if (!isset($_SESSION['wunschauswahl_leichte'])): ?>
+          <button class='modern-btn jumbo' type='submit' style="width:100%"><i class='fa fa-check'></i> Stimme abgeben</button>
+        <?php else: ?>
+          <div class="w3-panel w3-blue w3-round"><p><i class="fa fa-info-circle"></i> Du hast bereits abgestimmt.</p></div>
+        <?php endif; ?>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Tab: UMFRAGE VEGETARISCH -->
+<div id="umfrage_vegetarisch" class="tab-content">
+  <header class="hero-header w3-center">
+    <h1>Top-Vorschläge: Vegetarisch</h1>
+    <p class="w3-text-muted">Stimme für Deinen Favoriten ab.</p>
+  </header>
+  <div class="page-container">
+    <div class="modern-card">
+      <?php if ($surveySuccessMsg) echo "<div class='w3-panel w3-green w3-round w3-margin-bottom'><p>$surveySuccessMsg</p></div>"; ?>
+      <div class="w3-margin-bottom">
+        <input type="text" onkeyup="filterSurveyTable(this, 'table_veg')" placeholder="Suchen..." style="max-width: 400px;">
+      </div>
+      <form action="./index.php?#umfrage_vegetarisch" method="post">
+        <div class="w3-responsive">
+          <table class="modern-table" id="table_veg">
+            <tr><th style="width:5%;">#</th><th style="width:10%; text-align:center;">Wahl</th><th style="width:10%;">Votes</th><th style="width:15%;">Kat.</th><th style="width:50%;">Speise</th></tr>
+            <?php
+            $p = 1;
+            $stmt = $pdo->query("SELECT * FROM wunschspeisen WHERE wunschspeise_art='Vegetarisch' ORDER BY wunschspeise_anzahl DESC, wunschspeise_kategorie ASC");
+            while ($row = $stmt->fetch()) {
+                $dis = isset($_SESSION['wunschauswahl2']) ? "disabled" : "";
+                $chk = (isset($_SESSION['wunschauswahl2']) && $_SESSION['wunschauswahl2'] == $row['wunschspeise_nr']) ? "checked" : "";
+                echo "<tr><td>$p</td><td class='w3-center'><div class='modern-radio-container'><input type='radio' name='wunschauswahl2' value='".$row['wunschspeise_nr']."' $dis $chk></div></td><td>".h($row['wunschspeise_anzahl'])."</td><td>".h($row['wunschspeise_kategorie'])."</td><td>".formatMealName($row['wunschspeise_name'])."</td></tr>";
+                $p++;
+            }
+            ?>
+          </table>
+        </div>
+        <br>
+        <?php if (!isset($_SESSION['wunschauswahl2'])): ?>
+          <button class='modern-btn jumbo' type='submit' style="width:100%"><i class='fa fa-check'></i> Stimme abgeben</button>
+        <?php else: ?>
+          <div class="w3-panel w3-blue w3-round"><p><i class="fa fa-info-circle"></i> Du hast bereits abgestimmt.</p></div>
+        <?php endif; ?>
+      </form>
+    </div>
+  </div>
+</div>
+
+<?php if ($activeCustomSurvey): ?>
+<!-- Tab: FRAGEN (Custom Survey) -->
+<div id="umfrage_fragen" class="tab-content">
+  <header class="hero-header w3-center">
+    <h1><?php echo h($activeCustomSurvey['title']); ?></h1>
+    <p class="w3-text-muted">Deine Meinung ist uns wichtig!</p>
+  </header>
+  <div class="page-container">
+    <div class="modern-card">
+      <?php if ($surveySuccessMsg) echo "<div class='w3-panel w3-green w3-round w3-margin-bottom'><p>$surveySuccessMsg</p></div>"; ?>
+      
+      <?php if (isset($_SESSION[$sessionKey])): ?>
+          <!-- View Results -->
+          <h2 class="w3-text-white">Aktuelle Ergebnisse</h2>
+          <?php
+          $questions = $pdo->prepare("SELECT * FROM survey_questions WHERE survey_id = ?");
+          $questions->execute([$csId]);
+          while ($q = $questions->fetch()):
+               echo "<div class='w3-margin-bottom'>";
+               echo "<h4 class='w3-text-white'><b>".h($q['question_text'])."</b></h4>";
+               $options = $pdo->prepare("SELECT * FROM survey_options WHERE question_id = ?");
+               $options->execute([$q['id']]);
+               $opts = $options->fetchAll();
+               $totalVotes = array_sum(array_column($opts, 'votes'));
+               foreach ($opts as $o) {
+                   $pct = ($totalVotes > 0) ? round(($o['votes'] / $totalVotes) * 100) : 0;
+                   echo "<div class='w3-small w3-text-muted' style='display:flex; justify-content:space-between;'><span>".h($o['option_text'])."</span><span>$pct% (".h($o['votes']).")</span></div>";
+                   echo "<div class='w3-light-grey w3-round w3-tiny' style='height:8px; background: rgba(255,255,255,0.1); margin-bottom:10px;'><div class='w3-container w3-blue w3-round' style='height:8px; width:$pct%'></div></div>";
+               }
+               echo "</div><hr class='w3-opacity' style='margin: 20px 0;'>";
+          endwhile;
+          ?>
+          <p class="w3-text-muted w3-center">Vielen Dank für Deine Teilnahme!</p>
+      <?php else: ?>
+          <!-- Voting Form -->
+          <form action="./index.php?#umfrage_fragen" method="post">
+            <input type="hidden" name="submit_custom_survey" value="1">
+            <?php
+            $questions = $pdo->prepare("SELECT * FROM survey_questions WHERE survey_id = ?");
+            $questions->execute([$csId]);
+            while ($q = $questions->fetch()):
+            ?>
+              <div class="w3-margin-bottom">
+                 <h4 class="w3-text-white"><b><?php echo h($q['question_text']); ?></b></h4>
+                 <?php
+                 $options = $pdo->prepare("SELECT * FROM survey_options WHERE question_id = ?");
+                 $options->execute([$q['id']]);
+                 while ($o = $options->fetch()):
+                     $inputName = "q[".$q['id']."]" . ($q['type'] == 'checkbox' ? '[]' : '');
+                     $inputId = "o_" . $o['id'];
+                 ?>
+                   <div style="margin: 15px 0; display:flex; align-items:center; gap:10px;">
+                      <?php if ($q['type'] == 'checkbox'): ?>
+                        <input type="checkbox" name="<?php echo h($inputName); ?>" value="<?php echo h($o['id']); ?>" id="<?php echo h($inputId); ?>" class="w3-check">
+                      <?php else: ?>
+                        <div class="modern-radio-container" style="justify-content: flex-start;">
+                          <input type="radio" name="<?php echo h($inputName); ?>" value="<?php echo h($o['id']); ?>" id="<?php echo h($inputId); ?>">
+                        </div>
+                      <?php endif; ?>
+                      <label for="<?php echo h($inputId); ?>" style="cursor:pointer; flex:1;"><?php echo h($o['option_text']); ?></label>
+                   </div>
+                 <?php endwhile; ?>
+              </div>
+              <hr class="w3-opacity" style="margin: 30px 0;">
+            <?php endwhile; ?>
+            <br>
+            <button class='modern-btn jumbo' type='submit' style="width:100%"><i class='fa fa-paper-plane'></i> Umfrage absenden</button>
+          </form>
+      <?php endif; ?>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
+
   <?php
   // Check for Umfrage
   $stmt = $pdo->query("SELECT * FROM umfrage LIMIT 1");
@@ -362,9 +752,9 @@ require __DIR__ . '/templates/header.php';
           echo "<p class='w3-text-muted'>Neben dem Wahlmenü habt Ihr ab sofort auch die Möglichkeit den Speiseplan selbst zu gestalten.<br>";
           echo "Alle drei Monate könnt Ihr eigene Wunschspeisen vorschlagen und für Vorschläge von anderen stimmen.<br>";
           echo "Die <b>Top-Sieben</b> Vorschläge werden innerhalb von 2-4 Wochen in den Speiseplan aufgenommen.<br>";
-          echo "Jeder hat eine Stimme.</p><br>";
-          echo "<a href='./wunschTabelle.php' class='modern-btn' target='_blank '>";
-          echo "<i class='fa fa-line-chart'></i> Zur Umfrage";
+          echo "Jeder hat eine Stimme pro Kategorie.</p><br>";
+          echo "<a href='javascript:void(0)' onclick=\"openTab('umfrage_eingabe', event)\" class='modern-btn'>";
+          echo "<i class='fa fa-pencil'></i> Zur Umfrage / Vorschlag einreichen";
           echo "</a>";
           echo "</div>";
       }
@@ -536,6 +926,27 @@ require __DIR__ . '/templates/header.php';
       </div>
     </div>
   </div>
+
+<script>
+function filterSurveyTable(input, tableId) {
+    var filter = input.value.toUpperCase();
+    var table = document.getElementById(tableId);
+    var tr = table.getElementsByTagName("tr");
+    for (var i = 1; i < tr.length; i++) {
+        var display = false;
+        var tdKat = tr[i].getElementsByTagName("td")[3];
+        var tdName = tr[i].getElementsByTagName("td")[4];
+        if (tdKat || tdName) {
+            var txtKat = tdKat ? (tdKat.textContent || tdKat.innerText) : "";
+            var txtName = tdName ? (tdName.textContent || tdName.innerText) : "";
+            if (txtKat.toUpperCase().indexOf(filter) > -1 || txtName.toUpperCase().indexOf(filter) > -1) {
+                display = true;
+            }
+        }
+        tr[i].style.display = display ? "" : "none";
+    }
+}
+</script>
 
 <?php 
 require __DIR__ . '/templates/footer.php'; 

@@ -36,8 +36,8 @@ if (isset($_POST['beginDate'], $_POST['endDate'])) {
     }
 }
 if (isset($_POST['stop_umfrage'])) {
-    $hasUmfrage = ($pdo->query("SELECT COUNT(*) FROM umfrage")->fetchColumn() > 0);
-    if ($hasUmfrage) {
+    $hasUmfrageCheck = ($pdo->query("SELECT COUNT(*) FROM umfrage")->fetchColumn() > 0);
+    if ($hasUmfrageCheck) {
         $pdo->query("DELETE FROM umfrage");
         $pdo->query("CREATE TABLE IF NOT EXISTS ergebnis_umfrage SELECT * FROM wunschspeisen");
         $pdo->query("DELETE FROM ergebnis_umfrage");
@@ -46,6 +46,35 @@ if (isset($_POST['stop_umfrage'])) {
         $messages['umfrage'] = "<div class='w3-panel w3-green w3-round'><p><i class='fa fa-stop'></i> Umfrage gestoppt und ausgewertet.</p></div>";
     }
 }
+
+if (isset($_POST['delete_option'])) {
+    $stmt = $pdo->prepare("DELETE FROM survey_options WHERE id = ?");
+    $stmt->execute([$_POST['o_id']]);
+}
+
+// --- Eigene Umfrage (FRAGEN) Handle ---
+if (isset($_POST['create_custom_survey'])) {
+    $stmt = $pdo->prepare("INSERT INTO custom_surveys (title, beginn, ende, is_active) VALUES (?, ?, ?, 1)");
+    $stmt->execute([$_POST['cs_title'], $_POST['cs_begin'], $_POST['cs_end']]);
+    $messages['fragen'] = "<div class='w3-panel w3-green w3-round'><p><i class='fa fa-plus'></i> Eigene Umfrage erstellt.</p></div>";
+}
+if (isset($_POST['delete_survey'])) {
+    $stmt = $pdo->prepare("DELETE FROM custom_surveys WHERE id = ?");
+    $stmt->execute([$_POST['survey_id']]);
+}
+if (isset($_POST['add_question'])) {
+    $stmt = $pdo->prepare("INSERT INTO survey_questions (survey_id, question_text, type) VALUES (?, ?, ?)");
+    $stmt->execute([$_POST['survey_id'], $_POST['q_text'], $_POST['q_type']]);
+}
+if (isset($_POST['delete_question'])) {
+    $stmt = $pdo->prepare("DELETE FROM survey_questions WHERE id = ?");
+    $stmt->execute([$_POST['q_id']]);
+}
+if (isset($_POST['add_option'])) {
+    $stmt = $pdo->prepare("INSERT INTO survey_options (question_id, option_text) VALUES (?, ?)");
+    $stmt->execute([$_POST['q_id'], $_POST['o_text']]);
+}
+// ------------------------------
 
 // --- Speisen Handle ---
 if (isset($_POST['speise_name'], $_POST['speise_art'])) {
@@ -132,6 +161,17 @@ if (isset($_POST['delete_zs_nr'])) {
 
 // ======= END POST PROCESSING =======
 
+// Check for active survey
+$isSurveyActive = false;
+$stmtSurvey = $pdo->query("SELECT * FROM umfrage LIMIT 1");
+if ($umRow = $stmtSurvey->fetch()) {
+    $now = new DateTime();
+    if ($now >= new DateTime($umRow['beginn']) && $now <= new DateTime($umRow['ende'])) {
+        $isSurveyActive = true;
+    }
+}
+$surveyClass = $isSurveyActive ? ' survey-btn-flashing' : '';
+
 $sidebarHtml = '
   <a href="javascript:void(0)" onclick="openTab(\'auswertung\', event)" class="w3-bar-item w3-button w3-padding-large">
     <i class="fa fa-bar-chart w3-xlarge"></i><p style="font-size:10px; margin-top:-5px;">AUSWERTUNG</p>
@@ -148,8 +188,11 @@ $sidebarHtml = '
   <a href="javascript:void(0)" onclick="openTab(\'nachrichten\', event)" class="w3-bar-item w3-button w3-padding-large">
     <i class="fa fa-envelope-open w3-xlarge"></i><p style="font-size:10px; margin-top:-5px;">NACHRICHTEN</p>
   </a>
-  <a href="javascript:void(0)" onclick="openTab(\'umfrage\', event)" class="w3-bar-item w3-button w3-padding-large">
+  <a href="javascript:void(0)" onclick="openTab(\'umfrage\', event)" class="w3-bar-item w3-button w3-padding-large' . $surveyClass . '">
     <i class="fa fa-line-chart w3-xlarge"></i><p style="font-size:10px; margin-top:-5px;">UMFRAGE</p>
+  </a>
+  <a href="javascript:void(0)" onclick="openTab(\'fragen\', event)" class="w3-bar-item w3-button w3-padding-large">
+    <i class="fa fa-question-circle w3-xlarge"></i><p style="font-size:10px; margin-top:-5px;">FRAGEN</p>
   </a>
   <a href="javascript:void(0)" onclick="openTab(\'zusatz\', event)" class="w3-bar-item w3-button w3-padding-large">
     <i class="fa fa-asterisk w3-xlarge"></i><p style="font-size:10px; margin-top:-5px;">ZUSATZ</p>
@@ -168,8 +211,9 @@ $navbarSmallHtml = '
     <a href="javascript:void(0)" onclick="openTab(\'plaene\', event, \'wochenplan-section\')" class="w3-bar-item w3-button" style="width:14% !important; font-size:10px; padding:8px 0;">WEEK</a>
     <a href="javascript:void(0)" onclick="openTab(\'plaene\', event, \'wunschplan-section\')" class="w3-bar-item w3-button" style="width:14% !important; font-size:10px; padding:8px 0;">VOTE</a>
     <a href="javascript:void(0)" onclick="openTab(\'nachrichten\', event)" class="w3-bar-item w3-button" style="width:14% !important; font-size:10px; padding:8px 0;">MAIL</a>
-    <a href="javascript:void(0)" onclick="openTab(\'umfrage\', event)" class="w3-bar-item w3-button" style="width:14% !important; font-size:10px; padding:8px 0;">UMFR</a>
-    <a href="javascript:void(0)" onclick="openTab(\'zusatz\', event)" class="w3-bar-item w3-button" style="width:14% !important; font-size:10px; padding:8px 0;">ZUS</a>
+    <a href="javascript:void(0)" onclick="openTab(\'umfrage\', event)" class="w3-bar-item w3-button' . $surveyClass . '" style="width:12.5% !important; font-size:10px; padding:8px 0;">UMFR</a>
+    <a href="javascript:void(0)" onclick="openTab(\'fragen\', event)" class="w3-bar-item w3-button" style="width:12.5% !important; font-size:10px; padding:8px 0;">FRAG</a>
+    <a href="javascript:void(0)" onclick="openTab(\'zusatz\', event)" class="w3-bar-item w3-button" style="width:12.5% !important; font-size:10px; padding:8px 0;">ZUS</a>
 ';
 
 $pageTitle = 'Küche Dashboard';
@@ -577,8 +621,9 @@ require __DIR__ . '/templates/header.php';
         </div>
     </div>
     
+    <!-- Historie Table -->
     <div class="modern-card w3-margin-top">
-        <h2 style="margin-top:0">Historie / Ergebnis</h2>
+        <h2 style="margin-top:0">Historie / Ergebnis (Wunschspeisen)</h2>
         <div class="w3-responsive">
             <table class="modern-table">
                 <tr><th>Platz</th><th>Votes</th><th>Typ</th><th>Name</th></tr>
@@ -594,6 +639,111 @@ require __DIR__ . '/templates/header.php';
                 ?>
             </table>
         </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tab: FRAGEN -->
+<div id="fragen" class="tab-content">
+  <header class="hero-header w3-center">
+    <h1>Eigene Umfragen</h1>
+    <p class="w3-text-muted">Individuelle Fragen & Antworten verwalten.</p>
+  </header>
+  <div class="page-container">
+    <?php if (isset($messages['fragen'])) echo $messages['fragen']; ?>
+    <div class="modern-card">
+      <h2 style="margin-top:0"><i class="fa fa-question-circle w3-text-red"></i> Umfragen-Editor</h2>
+      <p class="w3-text-muted">Hier können Sie gezielte Fragen an die Nutzer stellen.</p>
+      
+      <hr class="w3-opacity">
+      
+      <!-- New Survey Form -->
+      <h3 class="w3-text-white">Neue Umfrage erstellen</h3>
+      <form action="#fragen" method="post" class="w3-margin-bottom">
+        <div class="w3-row-padding">
+          <div class="w3-third">
+            <input type="text" name="cs_title" placeholder="Titel (z.B. Feedback Salat)" required>
+          </div>
+          <div class="w3-third">
+            <input type="date" name="cs_begin" required>
+          </div>
+          <div class="w3-third">
+            <input type="date" name="cs_end" required>
+          </div>
+        </div>
+        <br>
+        <button type="submit" name="create_custom_survey" class="modern-btn jumbo" style="width:100%"><i class="fa fa-plus"></i> Umfrage erstellen</button>
+      </form>
+
+      <hr class="w3-opacity">
+
+      <!-- Survey List & Editor -->
+      <?php
+      $surveys = $pdo->query("SELECT * FROM custom_surveys ORDER BY id DESC");
+      while ($s = $surveys->fetch()):
+      ?>
+        <div class="modern-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+             <h3 style="margin:0; font-size:18px;"><?php echo h($s['title']); ?> 
+               <small class="w3-text-muted" style="font-size:12px;">(<?php echo h($s['beginn']); ?> - <?php echo h($s['ende']); ?>)</small>
+             </h3>
+             <form action="#fragen" method="post" onsubmit="return confirm('Sicher löschen?');">
+               <input type="hidden" name="survey_id" value="<?php echo $s['id']; ?>">
+               <button type="submit" name="delete_survey" class="w3-button w3-red w3-round w3-small"><i class="fa fa-trash"></i></button>
+             </form>
+          </div>
+
+          <div class="w3-padding-16">
+             <form action="#fragen" method="post" style="display:flex; gap:10px;">
+               <input type="hidden" name="survey_id" value="<?php echo $s['id']; ?>">
+               <input type="text" name="q_text" placeholder="Neue Frage..." required style="flex:1;">
+               <select name="q_type" style="width:150px;">
+                 <option value="radio">Single Choice</option>
+                 <option value="checkbox">Multiple Choice</option>
+               </select>
+               <button type="submit" name="add_question" class="modern-btn secondary small-text"><i class="fa fa-plus"></i> Frage</button>
+             </form>
+          </div>
+
+          <?php
+          $questions = $pdo->prepare("SELECT * FROM survey_questions WHERE survey_id = ?");
+          $questions->execute([$s['id']]);
+          while ($q = $questions->fetch()):
+          ?>
+            <div class="w3-padding w3-margin-bottom" style="background: rgba(0,0,0,0.2); border-radius:8px;">
+               <div style="display:flex; justify-content:space-between;">
+                 <b style="font-size:14px;">Q: <?php echo h($q['question_text']); ?> (<?php echo $q['type']; ?>)</b>
+                 <form action="#fragen" method="post">
+                   <input type="hidden" name="q_id" value="<?php echo $q['id']; ?>">
+                   <button type="submit" name="delete_question" class="w3-text-red w3-transparent" style="border:none; cursor:pointer;"><i class="fa fa-times"></i></button>
+                 </form>
+               </div>
+               
+               <div class="w3-padding-small">
+                 <?php
+                 $options = $pdo->prepare("SELECT * FROM survey_options WHERE question_id = ?");
+                 $options->execute([$q['id']]);
+                 while ($o = $options->fetch()):
+                 ?>
+                   <div style="display:flex; justify-content:space-between; font-size:12px; margin: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                     <span>· <?php echo h($o['option_text']); ?> (<b><?php echo $o['votes']; ?></b>)</span>
+                     <form action="#fragen" method="post">
+                       <input type="hidden" name="o_id" value="<?php echo $o['id']; ?>">
+                       <button type="submit" name="delete_option" class="w3-text-muted w3-transparent" style="border:none; cursor:pointer;"><i class="fa fa-times"></i></button>
+                     </form>
+                   </div>
+                 <?php endwhile; ?>
+                 
+                 <form action="#fragen" method="post" style="display:flex; gap:10px; margin-top:8px;">
+                    <input type="hidden" name="q_id" value="<?php echo $q['id']; ?>">
+                    <input type="text" name="o_text" placeholder="Antwort..." required style="flex:1; padding:4px 10px !important;">
+                    <button type="submit" name="add_option" class="modern-btn secondary small" style="padding: 4px 12px !important;">+</button>
+                 </form>
+               </div>
+            </div>
+          <?php endwhile; ?>
+        </div>
+      <?php endwhile; ?>
     </div>
   </div>
 </div>

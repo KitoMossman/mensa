@@ -7,14 +7,17 @@ Ein hochmodernes, webbasiertes Mensa-Verwaltungssystem, entwickelt für die effi
 Das System wurde grundlegend überarbeitet, um eine erstklassige Benutzererfahrung (UX) und ein zukunftssicheres Interface (UI) zu bieten:
 
 1. **Premium Dark-Mode Design:** Ein konsistentes, tiefdunkles Design mit Glassmorphismus-Effekten, optimierter Typografie (**Inter**) und hochwertigen UI-Komponenten (`modern-card`, `modern-btn`).
-2. **Dynamisches Tab-System:** Umstellung von einer langen Scroll-Seite auf eine intuitive, Tab-basierte Navigation. Der Status wird via JavaScript in der URL (`#hash`) synchronisiert, was die Nutzung der Browser-Historie ermöglicht.
-3. **App-Like Mobile Experience ("Perfect Fit"):** Eine speziell für Smartphones (z.B. Pixel 8, iPhone 15) optimierte Vollbild-Ansicht. Edge-to-Edge Design ohne störende Ränder und Unterstützung für moderne "Notches" durch Safe-Area-Insets.
-4. **Unified Admin Hub (`login.php`):** Alle administrativen Aufgaben wurden in einem zentralen Dashboard konsolidiert. Kein Hin- und Herspringen zwischen Dateien mehr nötig.
-5. **Anonymes Ticketsystem:** Gäste können Feedback senden und Antworten der Küche über eine anonyme Ticket-ID und ein zufälliges Geheimwort abrufen – ohne Registrierung.
-6. **Visuelles Farbleitsystem:** Die Speiseplan-Kategorien (Vollkost, Leichte Vollkost, Vegetarisch) sind farblich dezent hinterlegt, um die Orientierung auf einen Blick zu erleichtern.
-7. **Responsive & Mobile First:** Das System ist vollständig adaptiv. Die kompakte Sidebar (100px) auf Desktop-Geräten verwandelt sich auf Mobilgeräten in eine platzsparende Top-Navbar.
-8. **Barrierefreie Typografie:** Optimierte Kontrastwerte und leuchtende Akzente sorgen für eine hervorragende Lesbarkeit auf allen Hintergrund-Typen.
-9. **Screen-Fit Design:** Kompakte Tabellen und Karten sorgen dafür, dass der wöchentliche Speiseplan auf den meisten Bildschirmen ohne Scrollen sichtbar ist.
+2. **Dynamisches Tab-System:** Umstellung von einer langen Scroll-Seite auf eine intuitive, Tab-basierte Navigation inkl. URL-Hash-Synchronisierung.
+3. **App-Like Mobile Experience ("Perfect Fit"):** Für Smartphones optimierte Vollbild-Ansicht mit Safe-Area-Support.
+4. **Unified Admin Hub (`login.php`):** Alle administrativen Aufgaben wurden in einem zentralen Dashboard konsolidiert.
+5. **Flexible Custom Surveys ("FRAGEN"):** Die Küche kann nun eigenständig Umfragen (Single- & Multiple-Choice) erstellen – ideal für Feedback jeglicher Art.
+6. **Echtzeit-Ergebnisse:** Teilnehmer sehen nach der Stimmabgabe sofort die aktuellen Ergebnisse in grafischen Balkendiagrammen.
+7. **Anonymes Ticketsystem:** Gäste können Feedback senden und Antworten der Küche über eine Ticket-ID abrufen – ohne Registrierung.
+8. **Visuelles Farbleitsystem:** Kategorien sind farblich hinterlegt. Aktive Umfragen fallen durch einen rot blinkenden Button sofort ins Auge.
+9. **Responsive Design:** Das System ist vollständig adaptiv und für alle Endgeräte optimiert.
+10. **Barrierefreie Typografie:** Optimierte Kontrastwerte und leuchtende Akzente sorgen für hervorragende Lesbarkeit.
+11. **Sicherheit:** Konsequente Nutzung von Prepared Statements und moderner Session-Verschlüsselung.
+12. **Screen-Fit Layout:** Kompakte Darstellungen sorgen dafür, dass wichtige Infos oft ohne Scrollen sichtbar sind.
 
 ---
 
@@ -25,9 +28,10 @@ Das zentrale Dashboard (`login.php`) unterteilt sich in sieben spezialisierte Ma
 * 📊 **Auswertung:** Echtzeit-Statistiken und grafische Aufbereitung (Fortschrittsbalken) der laufenden Abstimmungen.
 * 🍴 **Speisen-Datenbank:** Zentrale Pflege aller verfügbaren Gerichte inkl. Kategorisierung.
 * 📅 **Wochenplan:** Intuitive Erstellung des Speiseplans für die aktuelle/kommende Woche.
-* 🗳️ **Wunsch-Wahl Prep:** Vorbereitung der Gerichte, die den Gästen zur Abstimmung gestellt werden.
-* ✉️ **Posteingang:** Verwaltung des Ticketsystems, Beantwortung von Gästeanfragen und Feedback.
-* 📈 **Umfragen:** Zeitliche Steuerung der Wunschspeisen-Wahl und Archivierung der Ergebnisse.
+* 🗳️ **Wunsch-Wahl Prep:** Vorbereitung der Gerichte für die Nutzer-Abstimmung.
+* ✉️ **Posteingang:** Verwaltung des Ticketsystems und Beantwortung von Gäste-Feedback.
+* 📈 **Umfragen:** Zeitliche Steuerung der Wunschspeisen-Wahl (Vollkost/Vegi/Leicht).
+* ❓ **Fragen:** Eigenständiger Editor für freie Single- und Multiple-Choice Umfragen inkl. Live-Tracking.
 * ✳️ **Zusatzstoffe:** Verwaltung der Inhaltsstoffe und Allergene.
 
 ---
@@ -54,7 +58,7 @@ Das Projekt folgt modernen Web-Standards und Sicherheitsbest Practices:
 ### ⚙️ Backend & Sicherheit
 
 * **PDO (PHP Data Objects):** Konsequente Nutzung von Prepared Statements zum Schutz vor SQL-Injection.
-* **Modernes Session-Handling:** Sicherer Admin-Bereich mit dedizierter Authentifizierungsprüfung.
+* **Modernes Session-Handling:** Sicherer Admin-Bereich und Schutz vor Mehrfach-Abstimmungen bei Umfragen.
 * **XSS-Prävention:** Zentralisierte Maskierung aller Benutzerausgaben via Helper-Funktion `h()`.
 * **Singleton Pattern:** Effiziente Datenbankverbindung über eine zentrale Instanz (`Database.php`).
 
