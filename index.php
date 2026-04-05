@@ -568,7 +568,7 @@ require __DIR__ . '/templates/header.php';
             while ($row = $stmt->fetch()) {
                 $dis = isset($_SESSION['wunschauswahl']) ? "disabled" : "";
                 $chk = (isset($_SESSION['wunschauswahl']) && $_SESSION['wunschauswahl'] == $row['wunschspeise_nr']) ? "checked" : "";
-                echo "<tr><td>$p</td><td class='w3-center'><div class='modern-radio-container'><input type='radio' name='wunschauswahl' value='".$row['wunschspeise_nr']."' $dis $chk></div></td><td>".h($row['wunschspeise_anzahl'])."</td><td>".h($row['wunschspeise_kategorie'])."</td><td>".formatMealName($row['wunschspeise_name'])."</td></tr>";
+                echo "<tr><td>$p</td><td class='w3-center'><div class='modern-radio-container' style='justify-content:center;'><input type='radio' name='wunschauswahl' value='".$row['wunschspeise_nr']."' $dis $chk class='modern-radio shadow'></div></td><td>".h($row['wunschspeise_anzahl'])."</td><td>".h($row['wunschspeise_kategorie'])."</td><td>".formatMealName($row['wunschspeise_name'])."</td></tr>";
                 $p++;
             }
             ?>
@@ -607,7 +607,7 @@ require __DIR__ . '/templates/header.php';
             while ($row = $stmt->fetch()) {
                 $dis = isset($_SESSION['wunschauswahl_leichte']) ? "disabled" : "";
                 $chk = (isset($_SESSION['wunschauswahl_leichte']) && $_SESSION['wunschauswahl_leichte'] == $row['wunschspeise_nr']) ? "checked" : "";
-                echo "<tr><td>$p</td><td class='w3-center'><div class='modern-radio-container'><input type='radio' name='wunschauswahl_leichte' value='".$row['wunschspeise_nr']."' $dis $chk></div></td><td>".h($row['wunschspeise_anzahl'])."</td><td>".h($row['wunschspeise_kategorie'])."</td><td>".formatMealName($row['wunschspeise_name'])."</td></tr>";
+                echo "<tr><td>$p</td><td class='w3-center'><div class='modern-radio-container' style='justify-content:center;'><input type='radio' name='wunschauswahl_leichte' value='".$row['wunschspeise_nr']."' $dis $chk class='modern-radio shadow'></div></td><td>".h($row['wunschspeise_anzahl'])."</td><td>".h($row['wunschspeise_kategorie'])."</td><td>".formatMealName($row['wunschspeise_name'])."</td></tr>";
                 $p++;
             }
             ?>
@@ -646,7 +646,7 @@ require __DIR__ . '/templates/header.php';
             while ($row = $stmt->fetch()) {
                 $dis = isset($_SESSION['wunschauswahl2']) ? "disabled" : "";
                 $chk = (isset($_SESSION['wunschauswahl2']) && $_SESSION['wunschauswahl2'] == $row['wunschspeise_nr']) ? "checked" : "";
-                echo "<tr><td>$p</td><td class='w3-center'><div class='modern-radio-container'><input type='radio' name='wunschauswahl2' value='".$row['wunschspeise_nr']."' $dis $chk></div></td><td>".h($row['wunschspeise_anzahl'])."</td><td>".h($row['wunschspeise_kategorie'])."</td><td>".formatMealName($row['wunschspeise_name'])."</td></tr>";
+                echo "<tr><td>$p</td><td class='w3-center'><div class='modern-radio-container' style='justify-content:center;'><input type='radio' name='wunschauswahl2' value='".$row['wunschspeise_nr']."' $dis $chk class='modern-radio shadow'></div></td><td>".h($row['wunschspeise_anzahl'])."</td><td>".h($row['wunschspeise_kategorie'])."</td><td>".formatMealName($row['wunschspeise_name'])."</td></tr>";
                 $p++;
             }
             ?>
@@ -714,15 +714,13 @@ require __DIR__ . '/templates/header.php';
                      $inputName = "q[".$q['id']."]" . ($q['type'] == 'checkbox' ? '[]' : '');
                      $inputId = "o_" . $o['id'];
                  ?>
-                   <div style="margin: 15px 0; display:flex; align-items:center; gap:10px;">
+                   <div style="margin: 15px 0; display:flex; align-items:center; gap:12px;">
                       <?php if ($q['type'] == 'checkbox'): ?>
-                        <input type="checkbox" name="<?php echo h($inputName); ?>" value="<?php echo h($o['id']); ?>" id="<?php echo h($inputId); ?>" class="w3-check">
+                        <input type="checkbox" name="<?php echo h($inputName); ?>" value="<?php echo h($o['id']); ?>" id="<?php echo h($inputId); ?>" class="modern-checkbox">
                       <?php else: ?>
-                        <div class="modern-radio-container" style="justify-content: flex-start;">
-                          <input type="radio" name="<?php echo h($inputName); ?>" value="<?php echo h($o['id']); ?>" id="<?php echo h($inputId); ?>">
-                        </div>
+                        <input type="radio" name="<?php echo h($inputName); ?>" value="<?php echo h($o['id']); ?>" id="<?php echo h($inputId); ?>" class="modern-radio shadow">
                       <?php endif; ?>
-                      <label for="<?php echo h($inputId); ?>" style="cursor:pointer; flex:1;"><?php echo h($o['option_text']); ?></label>
+                      <label for="<?php echo h($inputId); ?>" style="cursor:pointer; flex:1; line-height: 1.1; font-size: 15.5px;"><?php echo h($o['option_text']); ?></label>
                    </div>
                  <?php endwhile; ?>
               </div>
@@ -789,7 +787,7 @@ require __DIR__ . '/templates/header.php';
             
             <p>
               <label class="w3-text-muted" style="display:flex; align-items:center; gap:10px;">
-                <input type="checkbox" name="antwort_gewuenscht" class="w3-check"> Ich möchte eine Antwort der Küche erhalten <small>(Es wird ein Abruf-Code generiert)</small>
+                <input type="checkbox" name="antwort_gewuenscht" class="modern-checkbox"> Ich möchte eine Antwort der Küche erhalten <small>(Es wird ein Abruf-Code generiert)</small>
               </label>
             </p><br>
 
