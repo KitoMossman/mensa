@@ -50,6 +50,5 @@ require __DIR__ . '/templates/header.php';
 </div>
 
 <?php 
-require_once __DIR__ . '/impressum.php';
 require __DIR__ . '/templates/footer.php'; 
 ?>
