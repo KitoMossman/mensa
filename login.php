@@ -683,8 +683,19 @@ require __DIR__ . '/templates/header.php';
       while ($s = $surveys->fetch()):
       ?>
         <div class="modern-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">
+          <?php
+            $today = date('Y-m-d');
+            if ($today < $s['beginn']) {
+                $statusBadge = '<span class="w3-tag w3-blue w3-round w3-small" style="padding: 2px 8px;">Geplant</span>';
+            } elseif ($today > $s['ende']) {
+                $statusBadge = '<span class="w3-tag w3-grey w3-round w3-small" style="padding: 2px 8px;">Beendet</span>';
+            } else {
+                $statusBadge = '<span class="w3-tag w3-green w3-round w3-small" style="padding: 2px 8px;">Aktiv</span>';
+            }
+          ?>
           <div style="display:flex; justify-content:space-between; align-items:center;">
              <h3 style="margin:0; font-size:18px;"><?php echo h($s['title']); ?> 
+               <?php echo $statusBadge; ?>
                <small class="w3-text-muted" style="font-size:12px;">(<?php echo h($s['beginn']); ?> - <?php echo h($s['ende']); ?>)</small>
              </h3>
              <form action="#fragen" method="post" onsubmit="return confirm('Sicher löschen?');">
@@ -721,13 +732,27 @@ require __DIR__ . '/templates/header.php';
                
                <div class="w3-padding-small">
                  <?php
+                 // Total votes for percentage
+                 $stmtSum = $pdo->prepare("SELECT SUM(votes) as total FROM survey_options WHERE question_id = ?");
+                 $stmtSum->execute([$q['id']]);
+                 $rowSum = $stmtSum->fetch();
+                 $totalVotes = $rowSum['total'] ?: 1;
+
                  $options = $pdo->prepare("SELECT * FROM survey_options WHERE question_id = ?");
                  $options->execute([$q['id']]);
                  while ($o = $options->fetch()):
+                    $pct = round($o['votes'] / $totalVotes * 100);
                  ?>
-                   <div style="display:flex; justify-content:space-between; font-size:12px; margin: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
-                     <span>· <?php echo h($o['option_text']); ?> (<b><?php echo $o['votes']; ?></b>)</span>
-                     <form action="#fragen" method="post">
+                   <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; margin: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                     <span style="flex: 0 0 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">· <?php echo h($o['option_text']); ?></span>
+                     
+                     <div style="flex:1; background: rgba(255,255,255,0.05); height: 6px; border-radius: 3px; margin: 0 10px; overflow: hidden;">
+                        <div style="background: var(--accent-color); height: 100%; width: <?php echo $pct; ?>%; transition: width 0.5s ease;"></div>
+                     </div>
+
+                     <span style="flex: 0 0 60px; text-align: right;"><b><?php echo $o['votes']; ?></b> (<?php echo $pct; ?>%)</span>
+                     
+                     <form action="#fragen" method="post" style="flex: 0 0 20px; margin-left: 10px;">
                        <input type="hidden" name="o_id" value="<?php echo $o['id']; ?>">
                        <button type="submit" name="delete_option" class="w3-text-muted w3-transparent" style="border:none; cursor:pointer;"><i class="fa fa-times"></i></button>
                      </form>
