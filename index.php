@@ -352,7 +352,7 @@ require __DIR__ . '/templates/header.php';
                 
                 $isTodayClass = ($index === $todayIndex) ? "is-today" : "";
                 echo "<tr class='meal-day-row $isTodayClass' data-day-index='$index'>";
-                echo "<td class='day-name'><b>" . h($tag) . "</b>" . ($index === $todayIndex ? " <span class='today-badge'>Heute</span>" : "") . "</td>";
+                echo "<td class='day-name'><b>" . h($tag) . "</b><br>" . ($index === $todayIndex ? "<span class='today-badge'>Heute</span>" : "") . "</td>";
                 echo "<td class='col-vk' data-label='Vollkost'>" . formatMealName($vollkost) . "</td>";
                 echo "<td class='col-lvk' data-label='Leichte Vollkost'>" . formatMealName($leichteVollkost) . "</td>";
                 echo "<td class='col-veg' data-label='Vegetarisch'>" . formatMealName($vegetarisch) . "</td>";

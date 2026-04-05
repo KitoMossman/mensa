@@ -403,16 +403,6 @@ h2 {
     margin-bottom: 6px;
   }
 
-  .today-badge {
-    background: var(--accent-color) !important;
-    color: white !important;
-    font-size: 11px !important;
-    padding: 3px 10px !important;
-    border-radius: 20px !important;
-    text-transform: uppercase;
-    font-weight: 700 !important;
-    box-shadow: 0 0 15px var(--accent-glow);
-  }
 }
 
 
@@ -553,6 +543,22 @@ h2 {
   font-weight: 500;
   color: #fff;
   display: inline;
+}
+
+/* Today Badge */
+.today-badge {
+  background: var(--accent-color);
+  color: white !important;
+  font-size: 11px;
+  padding: 3px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  font-weight: 700;
+  box-shadow: 0 0 15px var(--accent-glow);
+  display: inline-block;
+  margin-bottom: 5px;
+  line-height: 1;
+  letter-spacing: 0.5px;
 }
 
 .meal-additives {
