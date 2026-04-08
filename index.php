@@ -84,9 +84,9 @@ if (isset($_POST['thema']) && isset($_POST['nachricht'])) {
     $stmt = $pdo->prepare("INSERT INTO nachrichten (absender, thema, nachricht, datum, ticket_id, geheimwort_hash, antwort_gewuenscht) VALUES (?, ?, ?, ?, ?, ?, ?)");
     if ($stmt->execute([$absender, $_POST['thema'], $_POST['nachricht'], date('Y-m-d'), $ticketId, $geheimwortHash, $antwort_gewuenscht])) {
         if ($antwort_gewuenscht) {
-            $contactMessage = "Nachricht gesendet!<br><br>Deine <b>Ticket-ID:</b> <span class='w3-xlarge'>" . h($ticketId) . "</span><br>Sicherheits-<b>Geheimwort:</b> <span class='w3-xlarge'>" . h($geheimwortPlain) . "</span><br><br>Bitte speichere Dir *beide* Werte, um die Antwort unter 'Antwort Abrufen' zu lesen.";
+            $contactMessage = "Nachricht gesendet!<br><br>Ihre <b>Ticket-ID:</b> <span class='w3-xlarge'>" . h($ticketId) . "</span><br>Sicherheits-<b>Geheimwort:</b> <span class='w3-xlarge'>" . h($geheimwortPlain) . "</span><br><br>Bitte speichern Sie sich *beide* Werte, um die Antwort unter 'Antwort Abrufen' zu lesen.";
         } else {
-            $contactMessage = "Vielen Dank für deine Nachricht!";
+            $contactMessage = "Vielen Dank für Ihre Nachricht!";
         }
     } else {
         $contactIsError = true;
@@ -100,21 +100,21 @@ if (isset($_POST['wunschauswahl']) && !isset($_SESSION['wunschauswahl'])) {
     $stmt = $pdo->prepare("UPDATE wunschspeisen SET wunschspeise_anzahl = wunschspeise_anzahl + 1 WHERE wunschspeise_nr = ?");
     if ($stmt->execute([$_POST['wunschauswahl']])) {
         $_SESSION['wunschauswahl'] = $_POST['wunschauswahl'];
-        $surveySuccessMsg = "Vielen Dank für Deine Stimme!";
+        $surveySuccessMsg = "Vielen Dank für Ihre Stimme!";
     }
 }
 if (isset($_POST['wunschauswahl_leichte']) && !isset($_SESSION['wunschauswahl_leichte'])) {
     $stmt = $pdo->prepare("UPDATE wunschspeisen SET wunschspeise_anzahl = wunschspeise_anzahl + 1 WHERE wunschspeise_nr = ?");
     if ($stmt->execute([$_POST['wunschauswahl_leichte']])) {
         $_SESSION['wunschauswahl_leichte'] = $_POST['wunschauswahl_leichte'];
-        $surveySuccessMsg = "Vielen Dank für Deine Stimme!";
+        $surveySuccessMsg = "Vielen Dank für Ihre Stimme!";
     }
 }
 if (isset($_POST['wunschauswahl2']) && !isset($_SESSION['wunschauswahl2'])) {
     $stmt = $pdo->prepare("UPDATE wunschspeisen SET wunschspeise_anzahl = wunschspeise_anzahl + 1 WHERE wunschspeise_nr = ?");
     if ($stmt->execute([$_POST['wunschauswahl2']])) {
         $_SESSION['wunschauswahl2'] = $_POST['wunschauswahl2'];
-        $surveySuccessMsg = "Vielen Dank für Deine Stimme!";
+        $surveySuccessMsg = "Vielen Dank für Ihre Stimme!";
     }
 }
 
@@ -174,7 +174,7 @@ $abrSuccess = "";
 if (isset($_POST['rueckantwort'], $_POST['ticket_nr'])) {
     $stmtUpdate = $pdo->prepare("UPDATE nachrichten SET nutzer_rueckantwort = ? WHERE nachrichten_nr = ?");
     if ($stmtUpdate->execute([$_POST['rueckantwort'], $_POST['ticket_nr']])) {
-        $abrSuccess = "Deine Rückantwort wurde erfolgreich gespeichert.";
+        $abrSuccess = "Ihre Rückantwort wurde erfolgreich gespeichert.";
     }
 }
 
@@ -494,7 +494,7 @@ require __DIR__ . '/templates/header.php';
 <div id="umfrage_eingabe" class="tab-content">
   <header class="hero-header w3-center">
     <h1>Wunschspeise einreichen</h1>
-    <p class="w3-text-muted">Habt Ihr eine Idee für den Speiseplan? Schickt sie uns!</p>
+    <p class="w3-text-muted">Haben Sie eine Idee für den Speiseplan? Schicken Sie sie uns!</p>
   </header>
   <div class="page-container">
     <?php if ($surveySuccessMsg): ?>
@@ -578,7 +578,7 @@ require __DIR__ . '/templates/header.php';
         <?php if (!isset($_SESSION['wunschauswahl'])): ?>
           <button class='modern-btn jumbo' type='submit' style="width:100%"><i class='fa fa-check'></i> Stimme abgeben</button>
         <?php else: ?>
-          <div class="w3-panel w3-blue w3-round"><p><i class="fa fa-info-circle"></i> Du hast bereits abgestimmt.</p></div>
+          <div class="w3-panel w3-blue w3-round"><p><i class="fa fa-info-circle"></i> Sie haben bereits abgestimmt.</p></div>
         <?php endif; ?>
       </form>
     </div>
@@ -617,7 +617,7 @@ require __DIR__ . '/templates/header.php';
         <?php if (!isset($_SESSION['wunschauswahl_leichte'])): ?>
           <button class='modern-btn jumbo' type='submit' style="width:100%"><i class='fa fa-check'></i> Stimme abgeben</button>
         <?php else: ?>
-          <div class="w3-panel w3-blue w3-round"><p><i class="fa fa-info-circle"></i> Du hast bereits abgestimmt.</p></div>
+          <div class="w3-panel w3-blue w3-round"><p><i class="fa fa-info-circle"></i> Sie haben bereits abgestimmt.</p></div>
         <?php endif; ?>
       </form>
     </div>
@@ -656,7 +656,7 @@ require __DIR__ . '/templates/header.php';
         <?php if (!isset($_SESSION['wunschauswahl2'])): ?>
           <button class='modern-btn jumbo' type='submit' style="width:100%"><i class='fa fa-check'></i> Stimme abgeben</button>
         <?php else: ?>
-          <div class="w3-panel w3-blue w3-round"><p><i class="fa fa-info-circle"></i> Du hast bereits abgestimmt.</p></div>
+          <div class="w3-panel w3-blue w3-round"><p><i class="fa fa-info-circle"></i> Sie haben bereits abgestimmt.</p></div>
         <?php endif; ?>
       </form>
     </div>
@@ -668,7 +668,7 @@ require __DIR__ . '/templates/header.php';
 <div id="umfrage_fragen" class="tab-content">
   <header class="hero-header w3-center">
     <h1><?php echo h($activeCustomSurvey['title']); ?></h1>
-    <p class="w3-text-muted">Deine Meinung ist uns wichtig!</p>
+    <p class="w3-text-muted">Ihre Meinung ist uns wichtig!</p>
   </header>
   <div class="page-container">
     <div class="modern-card">
@@ -695,7 +695,7 @@ require __DIR__ . '/templates/header.php';
                echo "</div><hr class='w3-opacity' style='margin: 20px 0;'>";
           endwhile;
           ?>
-          <p class="w3-text-muted w3-center">Vielen Dank für Deine Teilnahme!</p>
+          <p class="w3-text-muted w3-center">Vielen Dank für Ihre Teilnahme!</p>
       <?php else: ?>
           <!-- Voting Form -->
           <form action="./index.php?#umfrage_fragen" method="post">
@@ -745,10 +745,10 @@ require __DIR__ . '/templates/header.php';
       
       if ($now >= $beginnDate && $now <= $endDate) {
           echo "<div class='modern-card w3-center w3-margin'>";
-          echo "<h1 class='w3-jumbo'>Eure Wunschspeisen</h1>";
+          echo "<h1 class='w3-jumbo'>Ihre Wunschspeisen</h1>";
           echo "<p style='color: var(--danger-color); font-weight:600'>Aktuell: Umfrage vom ".h($beginnDate->format('d.m.y'))." bis ".h($endDate->format('d.m.y'))."</p>";
-          echo "<p class='w3-text-muted'>Neben dem Wahlmenü habt Ihr ab sofort auch die Möglichkeit den Speiseplan selbst zu gestalten.<br>";
-          echo "Alle drei Monate könnt Ihr eigene Wunschspeisen vorschlagen und für Vorschläge von anderen stimmen.<br>";
+          echo "<p class='w3-text-muted'>Neben dem Wahlmenü haben Sie ab sofort auch die Möglichkeit den Speiseplan selbst zu gestalten.<br>";
+          echo "Alle drei Monate können Sie eigene Wunschspeisen vorschlagen und für Vorschläge von anderen stimmen.<br>";
           echo "Die <b>Top-Sieben</b> Vorschläge werden innerhalb von 2-4 Wochen in den Speiseplan aufgenommen.<br>";
           echo "Jeder hat eine Stimme pro Kategorie.</p><br>";
           echo "<a href='javascript:void(0)' onclick=\"openTab('umfrage_eingabe', event)\" class='modern-btn'>";
@@ -763,7 +763,7 @@ require __DIR__ . '/templates/header.php';
   <div id="kontakt" class="tab-content">
     <header class="hero-header w3-center">
       <h1>Kontakt & Hilfe</h1>
-      <p class="w3-text-muted">Habt Ihr Fragen oder Feedback?</p>
+      <p class="w3-text-muted">Haben Sie Fragen oder Feedback?</p>
     </header>
 
     <div class="page-container">
@@ -832,7 +832,7 @@ require __DIR__ . '/templates/header.php';
           <hr class="w3-opacity">
           
           <div class="w3-margin-bottom">
-              <h4 class="w3-text-white"><b>Deine Nachricht (<?php echo h($abrMessageRecord['thema']); ?>)</b></h4>
+              <h4 class="w3-text-white"><b>Ihre Nachricht (<?php echo h($abrMessageRecord['thema']); ?>)</b></h4>
               <div class="w3-padding w3-round" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); white-space: pre-wrap;"><?php echo h($abrMessageRecord['nachricht']); ?></div>
           </div>
 
@@ -854,13 +854,13 @@ require __DIR__ . '/templates/header.php';
                             </form>
                           </details>
                       <?php else: ?>
-                          <h4 class="w3-text-white w3-margin-top"><b>Deine Rückantwort</b></h4>
+                          <h4 class="w3-text-white w3-margin-top"><b>Ihre Rückantwort</b></h4>
                           <div class="w3-padding w3-round" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); white-space: pre-wrap;"><?php echo h($abrMessageRecord['nutzer_rueckantwort']); ?></div>
                           <p class="w3-small w3-text-muted"><i>(Notiz: Dieses Ticket hat bereits die maximale Konversationstiefe erreicht.)</i></p>
                       <?php endif; ?>
                   </div>
               <?php else: ?>
-                  <div class="w3-padding w3-round" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #fcd34d;"><i>Die Küche hat Deine Nachricht noch nicht beantwortet. Bitte schaue später noch einmal vorbei.</i></div>
+                  <div class="w3-padding w3-round" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #fcd34d;"><i>Die Küche hat Ihre Nachricht noch nicht beantwortet. Bitte schauen Sie später noch einmal vorbei.</i></div>
               <?php endif; ?>
           </div>
           <br>
