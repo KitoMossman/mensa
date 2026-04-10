@@ -1,0 +1,207 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[ngerman]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{xcolor}
+
+\geometry{margin=2.5cm}
+
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codeblue}{rgb}{0.0,0.0,0.8}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    captionpos=b,
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{codeblue},
+    stringstyle=\color{orange},
+    numbers=left,
+    numberstyle=\tiny\color{codegray},
+    stepnumber=1,
+    numbersep=5pt,
+    frame=single,
+    showstringspaces=false,
+    language=PHP
+}
+
+\title{Technische Projektdokumentation \\ \Large Mensa Web-Applikation}
+\author{Dokumentation der Änderungen seit GitHub-Initialisierung}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\chapter{Einleitung}
+Dieses Dokument beschreibt die technische Architektur und die Implementierung der Mensa Web-Applikation. Schwerpunkt dieser Dokumentation sind die umfangreichen Modernisierungs- und Refactoring-Maßnahmen, die seit der ersten Bereitstellung auf GitHub durchgeführt wurden.
+
+Das Projekt dient der Verwaltung von Speiseplänen, der Durchführung von Abstimmungen über Wunschgerichte und der Kommunikation zwischen Nutzern und dem Küchenteam.
+
+\chapter{Systemarchitektur}
+
+\section{Technologie-Stack}
+Die Applikation basiert auf einem klassischen, aber modernisierten LAMP/WAMP-Stack:
+\begin{itemize}
+    \item \textbf{Backend:} PHP 8.x (objektorientiert und prozedural gemischt).
+    \item \textbf{Datenbank:} MariaDB / MySQL unter Verwendung von PDO (PHP Data Objects).
+    \item \textbf{Frontend:} HTML5, CSS3 (Custom Design System), JavaScript (Vanilla).
+    \item \textbf{Styling-Basis:} W3.CSS (modifiziert) für responsive Grids.
+\end{itemize}
+
+\section{Verzeichnisstruktur}
+Die Struktur wurde modularisiert, um Logik von der Darstellung zu trennen:
+\begin{itemize}
+    \item \texttt{/includes}: Zentrale Klassen und Funktionen (\texttt{Database.php}, \texttt{functions.php}).
+    \item \texttt{/templates}: Wiederverwendbare UI-Komponenten (\texttt{header.php}, \texttt{footer.php}).
+    \item \texttt{/docs}: Projektdokumentation.
+    \item \texttt{/images}: Bildressourcen.
+\end{itemize}
+
+\chapter{Backend-Implementierung}
+
+\section{Datenbankverbindung (Singleton-Pattern)}
+Die Datenbankverbindung wurde in der Klasse \texttt{Database.php} zentralisiert. Dies stellt sicher, dass pro Request nur eine Verbindung aufgebaut wird (Singleton).
+\begin{lstlisting}
+class Database {
+    private static $instance = null;
+    private $pdo;
+
+    private function __construct() {
+        // Verbindungsaufbau via PDO
+    }
+
+    public static function getInstance() {
+        if (self::$instance === null) {
+            self::$instance = new Database();
+        }
+        return self::$instance;
+    }
+}
+\end{lstlisting}
+
+\section{Template-System}
+Um Redundanz zu vermeiden, wurden Kopf- und Fußbereiche in Templates ausgelagert. Dies ermöglicht eine konsistente Benutzeroberfläche über alle Unterseiten (Index, Login, Zusatzstoffe) hinweg.
+
+\section{Sicherheitskonzept}
+\begin{itemize}
+    \item \textbf{Passwort-Hashing:} Admin-Passwörter werden mittels \texttt{password\_hash()} und dem BCRYPT-Algorithmus sicher gespeichert.
+    \item \textbf{Ticket-Sicherheit:} Für Rückantworten im Kontaktformular wird ein Geheimwort-Hashing eingesetzt, um unbefugten Zugriff auf Feedback zu verhindern.
+    \item \textbf{SQL-Injection Schutz:} Alle Datenbankabfragen nutzen konsequent \textit{Prepared Statements}.
+\end{itemize}
+
+\chapter{Datenbankmodell}
+Das Schema umfasst mehrere Tabellen zur Abbildung der Geschäftslogik:
+\begin{enumerate}
+    \item \textbf{speisen:} Stammdaten aller verfügbaren Gerichte.
+    \item \textbf{wochenplan / wunschplan:} Zuordnung von Speisen zu Kalendertagen.
+    \item \textbf{nachrichten:} Speicherung von Feedback und Support-Tickets inkl. Status (Antwort/Rückantwort).
+    \item \textbf{custom\_surveys:} Dynamische Umfragen mit flexiblen Fragen und Antwortmöglichkeiten.
+    \item \textbf{abstimmung:} Zählung der Stimmen für die wöchentliche Wahl.
+\end{enumerate}
+
+\chapter{Frontend \& Design-System}
+
+\section{Visual Excellence \& Dark Mode}
+Die Benutzeroberfläche wurde grundlegend modernisiert. Ein Fokus lag auf einem "Premium Dark Mode". 
+\begin{itemize}
+    \item \textbf{Farbpalette:} Tiefdunkle Hintergründe (\#121212) kombiniert mit lebhaften Akzentfarben für Kategorien (Vollkost: Blau, Vegetarisch: Grün).
+    \item \textbf{Responsive Design:} Optimierung für Mobilgeräte (Android/iOS) durch eine App-ähnliche Navigation.
+    \item \textbf{Interaktive Elemente:} Hover-Effekte, sanfte Übergänge und Glassmorphismus-Ansätze in der Card-View.
+\end{itemize}
+
+\section{Tab-basierte Navigation}
+Statt vieler einzelner PHP-Dateien wird nun ein Tab-System verwendet. Dies sorgt für eine flüssige Bedienung ohne vollständige Seiten-Reloads bei der Interaktion zwischen Umfragen, Kontakt und Speiseplan.
+
+\chapter{Wichtige Änderungen (Refactoring)}
+\begin{description}
+    \item[Sie-Ansprache:] Umstellung der gesamten Kommunikation von "Du" auf die formelle "Sie"-Form zur Steigerung der Professionalität.
+    \item[Zentralisierung:] Zusammenlegung der Admin-Funktionen in ein einheitliches Dashboard (\texttt{login.php}).
+    \item[Mobil-Optimierung:] Einführung von 100vh-Layouts und Anpassung an moderne Smartphone-Displays (Notch-Support).
+\end{description}
+
+\chapter{Lizenz}
+Das Projekt steht unter der \textbf{GNU General Public License v3.0}. Dies erlaubt die freie Nutzung und Modifikation unter Beibehaltung der Lizenzbedingungen.
+
+\appendix
+\chapter{Technische Code-Beispiele}
+In diesem Anhang werden Ausschnitte der zentralen Logik-Komponenten aufgeführt, die im Rahmen der Modernisierung implementiert wurden.
+
+\section{Datenbank-Singleton (Database.php)}
+Die zentrale Anbindung an die MariaDB erfolgt über PDO.
+\begin{lstlisting}
+class Database {
+    private static $instance = null;
+    private $pdo;
+
+    private function __construct() {
+        $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
+        $options = [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+        ];
+        $this->pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+    }
+
+    public static function getInstance() {
+        if (self::$instance === null) {
+            self::$instance = new Database();
+        }
+        return self::$instance;
+    }
+}
+\end{lstlisting}
+
+\section{Ticket-System Algorithmus (index.php)}
+Die Generierung der Ticket-ID und des Geheimworts für das Feedback-System.
+\begin{lstlisting}
+if ($antwort_gewuenscht) {
+    // Generierung einer 6-stelligen ID
+    $ticketId = strtoupper(substr(md5(uniqid(rand(), true)), 0, 6)); 
+    
+    // Auswahl eines Wortes aus einer vordefinierten Liste
+    $wordList = ["Apfel", "Banane", "Croissant", "Gabel", "Holunder", "Kaffee", "Limonade", "Melone", "Nudel"];
+    $geheimwortPlain = $wordList[array_rand($wordList)] . rand(10, 99);
+    
+    // Hashing des Geheimworts
+    $geheimwortHash = password_hash($geheimwortPlain, PASSWORD_BCRYPT);
+}
+\end{lstlisting}
+
+\section{Ergebnisvisulierung (Logik)}
+Berechnung der prozentualen Anteile für die Umfrage-Fortschrittsbalken.
+\begin{lstlisting}[language=PHP]
+$prozent = ($gesamtAnzahlProTag[$wunschRow['tag']] > 0) 
+           ? number_format($abstRow['cnt'] * 100 / $gesamtAnzahlProTag[$wunschRow['tag']], 0) 
+           : 0;
+
+echo "<div class='progress-bg'>";
+echo "  <div class='progress-bar $colClass' style='width:$prozent%'></div>";
+echo "</div>";
+\end{lstlisting}
+
+\section{Design-Variablen (CSS)}
+Auszug aus der \texttt{style.css} zur Steuerung des Dark Mode Designs.
+\begin{lstlisting}[language=PHP]
+:root {
+  --bg-main: #0B0E14;        /* Tiefer dunkler Hintergrund */
+  --bg-card: #1C212D;        /* Karten-Hintergrund */
+  --text-primary: #E2E8F0;   /* Helles Text-Blau/Grau */
+  --accent-color: #3B82F6;   /* Strahlendes Blau */
+  --success-color: #10B981;  /* Smaragdgruen fuer Veggi */
+  --surface-border: rgba(255, 255, 255, 0.08);
+}
+\end{lstlisting}
+
+\end{document}

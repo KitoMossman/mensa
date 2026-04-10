@@ -141,6 +141,25 @@ if (isset($_POST['submit_custom_survey']) && $activeCustomSurvey) {
         }
     }
 }
+// --- Abstimmung Handling (Integrated from abstimmung.php) ---
+$voteSuccessMsg = "";
+if (isset($_POST['abstimmung_submit']) && !isset($_SESSION['abgestimmt'])) {
+    $tage_abst = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
+    $stmt = $pdo->prepare("INSERT INTO abstimmung (speise_nr) VALUES (?)");
+    $voted_any = false;
+    foreach ($tage_abst as $tag) {
+        if (isset($_POST[$tag]) && $_POST[$tag] > 0) {
+            $stmt->execute([$_POST[$tag]]);
+            $voted_any = true;
+        }
+    }
+    if ($voted_any) {
+        $_SESSION['abgestimmt'] = true;
+        $voteSuccessMsg = "Vielen Dank für Ihre Stimme!";
+    } else {
+        $voteSuccessMsg = "Bitte wählen Sie mindestens eine Speise aus.";
+    }
+}
 // ---------------------------
 if (isset($_POST['sm_name'], $_POST['sm_beilage'], $_POST['sm_art'], $_POST['sm_kategorie'])) {
     $neueSpeiseName = trim($_POST['sm_name']) . " mit " . trim($_POST['sm_beilage']);
@@ -427,66 +446,76 @@ require __DIR__ . '/templates/header.php';
         <h2 class="w3-text-red" style="font-size:20px; font-weight:600;">! Bitte höchstens 1 mal abstimmen !</h2>
       </div>
 
-      <form action="./abstimmung.php#abstimmung" method="post">
-        <div class="modern-card">
-          <div class="w3-responsive">
-            <table class="modern-table">
-              <tr>
-                <th style="width:10%">Tag</th>
-                <th style="width:5%; text-align:center;">#</th>
-                <th style="width:25%">Vollkost</th>
-                <th style="width:5%; text-align:center;">#</th>
-                <th style="width:25%">Leichte Vollkost</th>
-                <th style="width:5%; text-align:center;">#</th>
-                <th style="width:25%">Vegetarisch</th>
-              </tr>
+      <?php if (isset($_SESSION['abgestimmt']) || $voteSuccessMsg): ?>
+        <div class="modern-card w3-center">
+            <h1 class='w3-jumbo w3-text-green' style="font-size: 60px !important;">Vielen Dank</h1>
+            <p class="w3-xlarge">Ihre Stimme wurde erfolgreich gezählt.</p>
+            <br>
+            <i class="fa fa-check-circle w3-text-green" style="font-size: 100px;"></i>
+        </div>
+      <?php else: ?>
+        <form action="./index.php#abstimmung" method="post">
+            <input type="hidden" name="abstimmung_submit" value="1">
+            <div class="modern-card">
+              <div class="w3-responsive">
+                <table class="modern-table">
+                  <tr>
+                    <th style="width:10%">Tag</th>
+                    <th style="width:5%; text-align:center;">#</th>
+                    <th style="width:25%">Vollkost</th>
+                    <th style="width:5%; text-align:center;">#</th>
+                    <th style="width:25%">Leichte Vollkost</th>
+                    <th style="width:5%; text-align:center;">#</th>
+                    <th style="width:25%">Vegetarisch</th>
+                  </tr>
 
-              <?php
-              $stmtWunsch = $pdo->prepare("SELECT speisen.speise_name, speisen.speise_art, speisen.speise_nr 
-                                           FROM wunschplan 
-                                           JOIN speisen ON wunschplan.speise_nr = speisen.speise_nr 
-                                           WHERE wunschplan.tag = ?");
-                                           
-              foreach ($tage as $tag) {
-                  $vk = ""; $vkNr = 0;
-                  $lvk = ""; $lvkNr = 0;
-                  $veg = ""; $vegNr = 0;
-                  
-                  $stmtWunsch->execute([$tag]);
-                  while ($row = $stmtWunsch->fetch()) {
-                      if ($row['speise_art'] == 'Vollkost') { $vk = $row['speise_name']; $vkNr = $row['speise_nr']; }
-                      if ($row['speise_art'] == 'Leichte Vollkost') { $lvk = $row['speise_name']; $lvkNr = $row['speise_nr']; }
-                      if ($row['speise_art'] == 'Vegetarisch') { $veg = $row['speise_name']; $vegNr = $row['speise_nr']; }
+                  <?php
+                  $stmtWunsch = $pdo->prepare("SELECT speisen.speise_name, speisen.speise_art, speisen.speise_nr 
+                                               FROM wunschplan 
+                                               JOIN speisen ON wunschplan.speise_nr = speisen.speise_nr 
+                                               WHERE wunschplan.tag = ?");
+                                               
+                  foreach ($tage as $tag) {
+                      $vk = ""; $vkNr = 0;
+                      $lvk = ""; $lvkNr = 0;
+                      $veg = ""; $vegNr = 0;
+                      
+                      $stmtWunsch->execute([$tag]);
+                      while ($row = $stmtWunsch->fetch()) {
+                          if ($row['speise_art'] == 'Vollkost') { $vk = $row['speise_name']; $vkNr = $row['speise_nr']; }
+                          if ($row['speise_art'] == 'Leichte Vollkost') { $lvk = $row['speise_name']; $lvkNr = $row['speise_nr']; }
+                          if ($row['speise_art'] == 'Vegetarisch') { $veg = $row['speise_name']; $vegNr = $row['speise_nr']; }
+                      }
+                      
+                      echo "<tr>";
+                      echo "<td><b>" . h($tag) . "</b></td>";
+                      
+                      $disVk = ($vk == "") ? "disabled" : "";
+                      echo "<td class='col-vk'><div class='modern-radio-container'><input type='radio' name='" . h($tag) . "' value='" . h($vkNr) . "' $disVk></div></td>";
+                      echo "<td class='col-vk'>" . formatMealName($vk) . "</td>";
+                      
+                      $disLvk = ($lvk == "") ? "disabled" : "";
+                      echo "<td class='col-lvk'><div class='modern-radio-container'><input type='radio' name='" . h($tag) . "' value='" . h($lvkNr) . "' $disLvk></div></td>";
+                      echo "<td class='col-lvk'>" . formatMealName($lvk) . "</td>";
+                      
+                      $disVeg = ($veg == "") ? "disabled" : "";
+                      echo "<td class='col-veg'><div class='modern-radio-container'><input type='radio' name='" . h($tag) . "' value='" . h($vegNr) . "' $disVeg></div></td>";
+                      echo "<td class='col-veg'>" . formatMealName($veg) . "</td>";
+                      
+                      echo "</tr>";
                   }
-                  
-                  echo "<tr>";
-                  echo "<td><b>" . h($tag) . "</b></td>";
-                  
-                  $disVk = ($vk == "") ? "disabled" : "";
-                  echo "<td class='col-vk'><div class='modern-radio-container'><input type='radio' name='" . h($tag) . "' value='" . h($vkNr) . "' $disVk></div></td>";
-                  echo "<td class='col-vk'>" . formatMealName($vk) . "</td>";
-                  
-                  $disLvk = ($lvk == "") ? "disabled" : "";
-                  echo "<td class='col-lvk'><div class='modern-radio-container'><input type='radio' name='" . h($tag) . "' value='" . h($lvkNr) . "' $disLvk></div></td>";
-                  echo "<td class='col-lvk'>" . formatMealName($lvk) . "</td>";
-                  
-                  $disVeg = ($veg == "") ? "disabled" : "";
-                  echo "<td class='col-veg'><div class='modern-radio-container'><input type='radio' name='" . h($tag) . "' value='" . h($vegNr) . "' $disVeg></div></td>";
-                  echo "<td class='col-veg'>" . formatMealName($veg) . "</td>";
-                  
-                  echo "</tr>";
-              }
-              ?>
-            </table>
-          </div>
-        </div>
-        
-        <div class="w3-center">
-          <button class="modern-btn jumbo" type="submit">
-            <i class="fa fa-paper-plane"></i> Abstimmen
-          </button>
-        </div>
-      </form>
+                  ?>
+                </table>
+              </div>
+            </div>
+            
+            <div class="w3-center">
+              <button class="modern-btn jumbo" type="submit">
+                <i class="fa fa-paper-plane"></i> Abstimmen
+              </button>
+            </div>
+        </form>
+      <?php endif; ?>
     </div>
   </div>
 
