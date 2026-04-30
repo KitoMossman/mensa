@@ -328,7 +328,10 @@ require __DIR__ . '/templates/header.php';
 
       echo "<h1>Mensa - Speiseplan</h1>";
       if (!empty($firstDayString)) {
-        echo "<h2>(" . h($firstDayString) . " - " . h($secondDayString) . ")</h2>";
+        $weekNum = date('W', strtotime($datumRow['datum']));
+        echo "<div class='current-week-indicator'>";
+        echo "<h2>KW $weekNum &nbsp; | &nbsp; " . h($firstDayString) . " - " . h($secondDayString) . "</h2>";
+        echo "</div>";
       }
     ?>
   </header>
@@ -436,7 +439,10 @@ require __DIR__ . '/templates/header.php';
 
         echo "<h1>Wochen-Wahl</h1>";
         if (!empty($wFirstDayString)) {
-          echo "<h2>(" . h($wFirstDayString) . " - " . h($wSecondDayString) . ")</h2>";
+          $weekNumW = date('W', strtotime($datumRow['datum']));
+          echo "<div class='current-week-indicator'>";
+          echo "<h2>KW $weekNumW &nbsp; | &nbsp; " . h($wFirstDayString) . " - " . h($wSecondDayString) . "</h2>";
+          echo "</div>";
         }
       ?>
     </header>
