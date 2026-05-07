@@ -1,10 +1,11 @@
 <?php
 // config/config.php
 
-define('DB_HOST', 'localhost');
-define('DB_USER', 'USER448338_mensa');
-define('DB_PASS', 'IT123_maki');
-define('DB_NAME', 'db_448338_9');
+define('DB_HOST', 'db');
+define('DB_PORT', '3306');
+define('DB_USER', 'kueche');
+define('DB_PASS', 'kueche');
+define('DB_NAME', 'kueche');
 define('DB_CHARSET', 'utf8mb4');
 
 define('APP_NAME', 'Mensa Administration');

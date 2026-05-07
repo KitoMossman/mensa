@@ -1,4 +1,11 @@
 .DS_Store
 Archiv.zip
-.vscode/sftp.json
+/docs/*.aux
+/docs/*.out
+/docs/*.toc
+/docs/*.synctex*
+/docs/*.bbl
+/docs/*.log
+/docs/*.run.xml
 .antigravity
+mensa.old

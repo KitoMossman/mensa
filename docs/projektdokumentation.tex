@@ -1,41 +1,85 @@
-\documentclass[12pt,a4paper]{report}
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage[ngerman]{babel}
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{amssymb}
+\documentclass[11pt,
+a4paper,
+numbers=nonperiod,
+footsepline,
+oneside,
+numbers=noenddot,
+bibliography=totoc
+]{scrreprt}
+\usepackage{scrlayer-scrpage}
+\usepackage{caption}
+\usepackage[pdfborder={0 0 0}]{hyperref}
 \usepackage{graphicx}
-\usepackage{geometry}
-\usepackage{hyperref}
+\usepackage[ngerman]{babel}
 \usepackage{listings}
-\usepackage{color}
+\usepackage[utf8]{inputenc}
+\usepackage{csquotes}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{booktabs}
 \usepackage{xcolor}
+\usepackage{pgfgantt}
+\usepackage[left=2cm, right=2cm, top=1.50cm, bottom=2.60cm]{geometry}
+\addtokomafont{sectioning}{\sffamily}
+\clubpenalty = 10000
+\widowpenalty = 10000
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd{\@maybeautodot}{.}{}{}{}
+\makeatother
+\usepackage[ngerman]{varioref} % Muss vor hyperref/cleveref geladen werden
+\usepackage[ngerman]{cleveref}
 
-\geometry{margin=2.5cm}
+% Verhindert, dass URLs über den Rand ragen
+\usepackage{xurl} 
+\hypersetup{breaklinks=true}
+\usepackage{etoc}
+\usepackage{float}
 
-\definecolor{codegray}{rgb}{0.5,0.5,0.5}
-\definecolor{codeblue}{rgb}{0.0,0.0,0.8}
+%Fusszeilen Einstellungen
+\newcommand{\fusszeilentitel}{Ingo Weber} % Hier kommt Ihr Name rein
+\clearpairofpagestyles
+\refoot{\raisebox{-1mm}{Seite \pagemark}}
+\lefoot{\raisebox{-1mm}{\fusszeilentitel}}
+
+\rofoot{\raisebox{-1mm}{Seite \pagemark}}
+\lofoot{\raisebox{-1mm}{\fusszeilentitel}}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
 \definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 
+% Globaler Stil für alle Listings
 \lstset{
-    basicstyle=\ttfamily\small,
-    breaklines=true,
-    captionpos=b,
-    commentstyle=\color{codegreen},
-    keywordstyle=\color{codeblue},
-    stringstyle=\color{orange},
-    numbers=left,
-    numberstyle=\tiny\color{codegray},
-    stepnumber=1,
-    numbersep=5pt,
-    frame=single,
-    showstringspaces=false,
-    language=PHP
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\footnotesize,
+	breakatwhitespace=false,         
+	breaklines=true,                 % Zeilenumbruch bei zu langen Zeilen
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    % Zeilennummern links
+	numbersep=5pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2,
+	literate=
+	{ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+	{Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1 {ß}{{\ss}}1
 }
 
+
 \title{Technische Projektdokumentation \\ \Large Mensa Web-Applikation}
-\author{Dokumentation der Änderungen seit GitHub-Initialisierung}
+\author{Dokumentation der Änderungen seit GitHub-Initialisierung \\\\ Autor: Ingo Weber (ITSE2501)}
 \date{\today}
 
 \begin{document}
@@ -46,58 +90,88 @@
 \chapter{Einleitung}
 Dieses Dokument beschreibt die technische Architektur und die Implementierung der Mensa Web-Applikation. Schwerpunkt dieser Dokumentation sind die umfangreichen Modernisierungs- und Refactoring-Maßnahmen, die seit der ersten Bereitstellung auf GitHub durchgeführt wurden.
 
-Das Projekt dient der Verwaltung von Speiseplänen, der Durchführung von Abstimmungen über Wunschgerichte und der Kommunikation zwischen Nutzern und dem Küchenteam.
+Das Projekt dient der Verwaltung von Speiseplänen, der Durchführung von Abstimmungen über Wunschgerichte und der Kommunikation zwischen Nutzern und dem Küchenteam. Ziel der Überarbeitung war es, eine technisch veraltete und schwer wartbare Codebasis in eine moderne, sichere und benutzerfreundliche Anwendung zu transformieren.
+
+\chapter{Analyse des Ist-Zustands}
+Vor der Modernisierung wies die Applikation (dokumentiert im Verzeichnis \texttt{mensa.old}) signifikante technische und gestalterische Defizite auf, die eine Weiterentwicklung erschwerten.
+
+\section{Strukturelle Mängel}
+Die ursprüngliche Codebasis war monolithisch und wenig strukturiert:
+\begin{itemize}
+    \item \textbf{Dateiorganisation:} Nahezu alle PHP-Skripte, SQL-Dumps und Hilfsdateien lagen unsortiert im Hauptverzeichnis. Es gab keine klare Trennung zwischen Logik, Konfiguration und Darstellung.
+    \item \textbf{Spaghetti-Code:} PHP-Logik und HTML-Markup waren eng miteinander verzahnt. Datenbankabfragen wurden direkt innerhalb der Darstellungsschicht ausgeführt, oft redundant durch mehrfaches Einbinden der \texttt{conn.php}.
+    \item \textbf{Code-Duplikation:} Ähnliche Funktionalitäten (z. B. Datenbankverbindungen oder Header-Elemente) wurden in vielen Dateien separat implementiert oder über unflexible \texttt{require}-Ketten geladen.
+\end{itemize}
+
+\section{Sicherheitsrelevante Schwachstellen}
+Die Sicherheit entsprach nicht modernen Standards:
+\begin{itemize}
+    \item \textbf{Datenbank-Anbindung:} Zugangsdaten waren im Klartext in der \texttt{conn.php} hartkodiert. Es gab kein zentrales Konfigurationsmanagement für unterschiedliche Umgebungen (Lokal vs. Produktion).
+    \item \textbf{Authentifizierung:} Das Admin-System basierte auf einfacheren Mechanismen ohne durchgängige Nutzung moderner Hashing-Verfahren für alle Bereiche.
+    \item \textbf{Eingabevalidierung:} Der Schutz gegen SQL-Injection war nicht flächendeckend durch Prepared Statements gewährleistet, was ein potenzielles Sicherheitsrisiko darstellte.
+\end{itemize}
+
+\section{Benutzererfahrung und Design}
+Das Frontend war funktional, aber optisch veraltet:
+\begin{itemize}
+    \item \textbf{UI-Framework:} Die Nutzung von W3.CSS erfolgte ohne Anpassungen oder ein konsistentes Design-System. Die Oberfläche wirkte generisch und wenig professionell.
+    \item \textbf{Ansprache:} Die Nutzer wurden durchgängig mit 'Du' angesprochen, was für eine offizielle Einrichtung wie eine Mensa als zu informell eingestuft wurde.
+    \item \textbf{Responsive Design:} Zwar war die Seite grundsätzlich responsiv, jedoch fehlte eine gezielte Optimierung für moderne mobile Endgeräte (z. B. App-ähnliche Navigation, Full-Screen-Layouts).
+\end{itemize}
 
 \chapter{Systemarchitektur}
+Die neue Architektur zielt auf eine saubere Trennung von Belangen (Separation of Concerns) ab, um die Wartbarkeit und Erweiterbarkeit zu erhöhen.
 
 \section{Technologie-Stack}
-Die Applikation basiert auf einem klassischen, aber modernisierten LAMP/WAMP-Stack:
+Die Applikation basiert auf einem klassischen, aber modernisierten LAMP/WAMP-Stack. Der Fokus lag hierbei auf der Konsolidierung der Backend-Logik:
 \begin{itemize}
-    \item \textbf{Backend:} PHP 8.x (objektorientiert und prozedural gemischt).
-    \item \textbf{Datenbank:} MariaDB / MySQL unter Verwendung von PDO (PHP Data Objects).
-    \item \textbf{Frontend:} HTML5, CSS3 (Custom Design System), JavaScript (Vanilla).
-    \item \textbf{Styling-Basis:} W3.CSS (modifiziert) für responsive Grids.
+    \item \textbf{Backend:} PHP 8.x. Übergang von rein prozeduralem Code zu einem objektorientierten Ansatz für Kernkomponenten (Datenbank, Session-Handling).
+    \item \textbf{Datenbank:} MariaDB / MySQL. Migration von der veralteten \texttt{mysql\_*}-Logik (in sehr alten Versionen) bzw. unstrukturiertem PDO hin zu einem zentralen PDO-Singleton.
+    \item \textbf{Frontend:} HTML5, CSS3 (Custom Design System), JavaScript (Vanilla). Verzicht auf schwere Bibliotheken zugunsten von Performance und Kontrolle.
+    \item \textbf{Styling-Basis:} Modifiziertes W3.CSS als Grid-System, ergänzt durch ein umfangreiches Set an CSS-Custom-Properties (Variables).
 \end{itemize}
 
-\section{Verzeichnisstruktur}
-Die Struktur wurde modularisiert, um Logik von der Darstellung zu trennen:
-\begin{itemize}
-    \item \texttt{/includes}: Zentrale Klassen und Funktionen (\texttt{Database.php}, \texttt{functions.php}).
-    \item \texttt{/templates}: Wiederverwendbare UI-Komponenten (\texttt{header.php}, \texttt{footer.php}).
-    \item \texttt{/docs}: Projektdokumentation.
-    \item \texttt{/images}: Bildressourcen.
-\end{itemize}
+\section{Verzeichnisstruktur (Vergleich)}
+Ein wesentlicher Teil des Refactorings war die Reorganisation der Dateien.
+
+\begin{table}[H]
+    \centering
+    \caption{Vergleich der Verzeichnisstrukturen}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Komponente} & \textbf{Alte Struktur (Ist)} & \textbf{Neue Struktur (Soll)} \\
+        \midrule
+        Konfiguration & \texttt{conn.php} (im Root) & \texttt{/config/config.php} \\
+        Datenbank-Logik & Verteilt in PHP-Dateien & \texttt{/includes/Database.php} \\
+        UI-Komponenten & \texttt{block*.php} (im Root) & \texttt{/templates/*.php} \\
+        Dokumentation & Nicht vorhanden / Lokal & \texttt{/docs/*.tex} \\
+        SQL-Skripte & Viele Dumps im Root & \texttt{/mesa.sql} (bereinigt) \\
+        Bilder & \texttt{/images} & \texttt{/images} (strukturiert) \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Durch diese Modularisierung wurde sichergestellt, dass Änderungen an der Datenbankverbindung nur an einer einzigen Stelle (\texttt{config.php}) vorgenommen werden müssen, anstatt in jeder PHP-Datei einzeln.
 
 \chapter{Backend-Implementierung}
 
-\section{Datenbankverbindung (Singleton-Pattern)}
-Die Datenbankverbindung wurde in der Klasse \texttt{Database.php} zentralisiert. Dies stellt sicher, dass pro Request nur eine Verbindung aufgebaut wird (Singleton).
-\begin{lstlisting}
-class Database {
-    private static $instance = null;
-    private $pdo;
+\section{Modernisierung der Datenbankschicht}
+Im alten System wurde die Verbindung über eine globale Variable \texttt{\$conn} in der Datei \texttt{conn.php} realisiert. Diese Datei wurde in fast jedem Skript mittels \texttt{require} eingebunden, was zu unübersichtlichen Abhängigkeiten und Problemen bei Unit-Tests oder der Skalierung führte.
 
-    private function __construct() {
-        // Verbindungsaufbau via PDO
-    }
+\subsection{Datenbankverbindung (Singleton-Pattern)}
+Die Datenbankverbindung wurde in der Klasse \texttt{Database.php} zentralisiert. Dies stellt sicher, dass pro Request nur eine Verbindung aufgebaut wird (Singleton). Zudem werden Konfigurationsparameter nun aus einer separaten \texttt{config.php} geladen, die außerhalb des öffentlichen Web-Verzeichnisses liegen kann.
 
-    public static function getInstance() {
-        if (self::$instance === null) {
-            self::$instance = new Database();
-        }
-        return self::$instance;
-    }
-}
-\end{lstlisting}
-
-\section{Template-System}
-Um Redundanz zu vermeiden, wurden Kopf- und Fußbereiche in Templates ausgelagert. Dies ermöglicht eine konsistente Benutzeroberfläche über alle Unterseiten (Index, Login, Zusatzstoffe) hinweg.
+\section{Einführung eines Template-Systems}
+Um Redundanz zu vermeiden, wurden Kopf- und Fußbereiche in Templates ausgelagert (\texttt{header.php}, \texttt{footer.php}). Das neue System nutzt PHP-Variablen zur Steuerung von Seitentiteln und aktiven Menüpunkten, was die Logik in den einzelnen Inhaltsseiten (z. B. \texttt{index.php}, \texttt{login.php}) drastisch reduziert hat.
 
 \section{Sicherheitskonzept}
+Ein wesentlicher Teil des Projekts war die Behebung der im Ist-Zustand identifizierten Sicherheitslücken.
+
 \begin{itemize}
-    \item \textbf{Passwort-Hashing:} Admin-Passwörter werden mittels \texttt{password\_hash()} und dem BCRYPT-Algorithmus sicher gespeichert.
-    \item \textbf{Ticket-Sicherheit:} Für Rückantworten im Kontaktformular wird ein Geheimwort-Hashing eingesetzt, um unbefugten Zugriff auf Feedback zu verhindern.
-    \item \textbf{SQL-Injection Schutz:} Alle Datenbankabfragen nutzen konsequent \textit{Prepared Statements}.
+    \item \textbf{Zentrales Konfigurationsmanagement:} Zugangsdaten werden nicht mehr in der Verbindungsdatei hartkodiert, sondern über Konstanten in der \texttt{config.php} verwaltet.
+    \item \textbf{Passwort-Hashing:} Admin-Passwörter werden mittels \texttt{password\_hash()} und dem BCRYPT-Algorithmus sicher gespeichert. Alte Klartext- oder schwach gehashte Passwörter wurden im Zuge der Migration ersetzt.
+    \item \textbf{Ticket-Sicherheit:} Für Rückantworten im Kontaktformular wird ein Geheimwort-Hashing eingesetzt. Das System generiert eine Ticket-ID und ein zufälliges Wort, das nur dem Einreicher bekannt ist.
+    \item \textbf{SQL-Injection Schutz:} Durch den Einsatz von PDO und konsequenten \textit{Prepared Statements} wurde die Anfälligkeit für SQL-Injektionen eliminiert.
 \end{itemize}
 
 \chapter{Datenbankmodell}
@@ -111,31 +185,75 @@ Das Schema umfasst mehrere Tabellen zur Abbildung der Geschäftslogik:
 \end{enumerate}
 
 \chapter{Frontend \& Design-System}
+Das neue Design-System bricht mit dem generischen Look des ursprünglichen W3.CSS-Einsatzes.
 
-\section{Visual Excellence \& Dark Mode}
-Die Benutzeroberfläche wurde grundlegend modernisiert. Ein Fokus lag auf einem "Premium Dark Mode". 
+\section{Visual Excellence \& Design-Tokens}
+Statt fester Farbklassen werden nun CSS-Variablen (\textit{Design Tokens}) verwendet. Dies ermöglicht eine einfache Anpassung des gesamten Erscheinungsbildes (z. B. für saisonale Aktionen) an einer zentralen Stelle in der \texttt{style.css}.
 \begin{itemize}
-    \item \textbf{Farbpalette:} Tiefdunkle Hintergründe (\#121212) kombiniert mit lebhaften Akzentfarben für Kategorien (Vollkost: Blau, Vegetarisch: Grün).
-    \item \textbf{Responsive Design:} Optimierung für Mobilgeräte (Android/iOS) durch eine App-ähnliche Navigation.
-    \item \textbf{Interaktive Elemente:} Hover-Effekte, sanfte Übergänge und Glassmorphismus-Ansätze in der Card-View.
+    \item \textbf{Farbpalette:} Ein moderner Dark Mode mit tiefen Blautönen (\#0B0E14) und einer klaren Akzentfarbe (\#3B82F6) sorgt für eine hochwertige Anmutung.
+    \item \textbf{Glassmorphismus:} Karten und Overlays nutzen \texttt{backdrop-filter} und subtile Transparenzen, um Tiefe zu erzeugen.
 \end{itemize}
 
-\section{Tab-basierte Navigation}
-Statt vieler einzelner PHP-Dateien wird nun ein Tab-System verwendet. Dies sorgt für eine flüssige Bedienung ohne vollständige Seiten-Reloads bei der Interaktion zwischen Umfragen, Kontakt und Speiseplan.
+\section{Responsive App-Experience}
+Besonderes Augenmerk wurde auf die mobile Nutzung gelegt:
+\begin{itemize}
+    \item \textbf{Tab-Navigation:} Eine am unteren Bildschirmrand fixierte Navigationsleiste (ähnlich einer nativen App) erleichtert die Bedienung mit einer Hand.
+    \item \textbf{Content-Management:} Große Tabellen aus dem Ist-Zustand wurden in der Mobilansicht durch stapelbare Karten ersetzt, um horizontales Scrollen zu vermeiden.
+\end{itemize}
 
 \chapter{Wichtige Änderungen (Refactoring)}
 \begin{description}
-    \item[Sie-Ansprache:] Umstellung der gesamten Kommunikation von "Du" auf die formelle "Sie"-Form zur Steigerung der Professionalität.
-    \item[Zentralisierung:] Zusammenlegung der Admin-Funktionen in ein einheitliches Dashboard (\texttt{login.php}).
-    \item[Mobil-Optimierung:] Einführung von 100vh-Layouts und Anpassung an moderne Smartphone-Displays (Notch-Support).
+    \item[Förmliche Ansprache (Sie):] Die gesamte Anwendung wurde von der 'Du'-Form auf die formelle "Sie"-Ansprache umgestellt. Dies betrifft nicht nur Texte in der UI, sondern auch Fehlermeldungen und Systembenachrichtigungen.
+    \item[Zusammenführung der Logik:] Statt für jede Funktion (Abstimmung, Umfrage, Kontakt) eine eigene PHP-Datei aufzurufen, wird nun ein zentraler Controller-Ansatz in der \texttt{index.php} genutzt. Dies reduziert die Ladezeiten und verbessert die User Experience.
+    \item[Fehlerbehandlung:] Einführung einer zentralen Fehlerbehandlung, die dem Nutzer verständliche Rückmeldungen gibt, anstatt kryptische PHP-Fehlermeldungen anzuzeigen.
+    \item[Mobil-Optimierung:] Integration von Viewport-Anpassungen für Geräte mit Display-Aussparungen (Notch) und Optimierung der Touch-Targets.
 \end{description}
 
 \chapter{Lizenz}
 Das Projekt steht unter der \textbf{GNU General Public License v3.0}. Dies erlaubt die freie Nutzung und Modifikation unter Beibehaltung der Lizenzbedingungen.
-
+\newpage
 \appendix
+
 \chapter{Technische Code-Beispiele}
 In diesem Anhang werden Ausschnitte der zentralen Logik-Komponenten aufgeführt, die im Rahmen der Modernisierung implementiert wurden.
+
+\section{Vergleich: Datenbank-Anbindung (Alt vs. Neu)}
+Hier wird der strukturelle Unterschied zwischen der alten prozeduralen Einbindung und dem neuen objektorientierten Singleton-Ansatz deutlich.
+
+\subsection{Ist-Zustand (Alt: conn.php)}
+\begin{lstlisting}[language=PHP]
+	// conn.php - Wurde in jeder Datei inkludiert
+	$server = "localhost";
+	$user = "root";
+	$passwd = "password";
+	try {
+		$conn = new PDO("mysql:host=$server;dbname=mensa", $user, $passwd);
+		$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	} catch(PDOException $e) {
+		echo "Connection failed: " . $e->getMessage();
+	}
+\end{lstlisting}
+
+\subsection{Soll-Zustand (Neu: Database.php)}
+\begin{lstlisting}[language=PHP]
+	// includes/Database.php - Singleton Pattern
+	class Database {
+		private static $instance = null;
+		private $pdo;
+		
+		private function __construct() {
+			$dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME;
+			$this->pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+		}
+		
+		public static function getInstance() {
+			if (self::$instance === null) {
+				self::$instance = new Database();
+			}
+			return self::$instance;
+		}
+	}
+\end{lstlisting}
 
 \section{Datenbank-Singleton (Database.php)}
 Die zentrale Anbindung an die MariaDB erfolgt über PDO.
@@ -145,7 +263,7 @@ class Database {
     private $pdo;
 
     private function __construct() {
-        $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
+        $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
