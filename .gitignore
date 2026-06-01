@@ -1,11 +1,10 @@
 .DS_Store
 Archiv.zip
-/docs/*.aux
-/docs/*.out
-/docs/*.toc
-/docs/*.synctex*
-/docs/*.bbl
-/docs/*.log
-/docs/*.run.xml
+.vscode/sftp.json
 .antigravity
+docs/projektdokumentation.log
+docs/projektdokumentation.aux
+docs/projektdokumentation.out
+docs/projektdokumentation.toc
+docs/projektdokumentation.synctex.gz
 mensa.old

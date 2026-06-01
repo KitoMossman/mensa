@@ -51,8 +51,7 @@ h6 {
 h2 {
   font-family: var(--font-family);
   font-weight: 700;
-  color: #93c5fd;
-  /* Brighter Radiant Blue */
+  color: #93c5fd; /* Brighter Radiant Blue */
   text-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
   letter-spacing: -0.01em;
   margin-top: 0;
@@ -179,9 +178,7 @@ h2 {
 }
 
 @media only screen and (max-width: 600px) {
-
-  html,
-  body {
+  html, body {
     height: 100% !important;
     overflow: hidden !important;
     position: fixed;
@@ -208,7 +205,7 @@ h2 {
     left: 0 !important;
     right: 0 !important;
     box-shadow: none !important;
-    background-image: none !important;
+    background-image: none !important; 
   }
 
   #main {
@@ -220,9 +217,9 @@ h2 {
   }
 
   /* Hide Navigation and Footer on Mobile as requested */
-  #myNavbar,
-  .modern-sidebar,
-  footer.w3-content,
+  #myNavbar, 
+  .modern-sidebar, 
+  footer.w3-content, 
   #impressum,
   .desktop-only {
     display: none !important;
@@ -236,8 +233,7 @@ h2 {
     padding-bottom: 20px !important;
     padding-left: 20px !important;
     padding-right: 20px !important;
-    flex: 0 0 220px !important;
-    /* Stable basis for snapping */
+    flex: 0 0 220px !important; /* Stable basis for snapping */
     display: flex !important;
     flex-direction: column;
     justify-content: center;
@@ -292,8 +288,7 @@ h2 {
   .meal-plan-scroll-wrapper {
     flex: 1 !important;
     display: block !important;
-    overflow-y: scroll !important;
-    /* Forced scroll for Android Snapping */
+    overflow-y: scroll !important; /* Forced scroll for Android Snapping */
     scroll-snap-type: y mandatory !important;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain !important;
@@ -335,7 +330,7 @@ h2 {
     border-radius: 0 !important;
     scroll-snap-align: start !important;
     scroll-snap-stop: always !important;
-    padding: 0 !important;
+    padding: 0 !important; 
     box-shadow: none !important;
     /* Fill 100% of the parent scroll area's height */
     height: 100% !important;
@@ -453,8 +448,7 @@ h2 {
 .hero-header h2 {
   opacity: 1;
   font-size: 1.8rem !important;
-  color: #fff;
-  /* High Contrast White for images */
+  color: #fff; /* High Contrast White for images */
   text-shadow: 0 0 15px var(--accent-color);
   margin: 0;
   font-weight: 600;
@@ -462,11 +456,11 @@ h2 {
 }
 
 .current-week-indicator {
-  margin-top: 5px;
-  margin-bottom: 10px;
+  margin-top: 15px;
+  magin-bottom: 10px;
   display: inline-block;
   padding: 8px 30px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.4);
   border-radius: 50px;
   border: 1px solid var(--accent-color);
   backdrop-filter: blur(8px);
@@ -518,7 +512,7 @@ h2 {
 .modern-table th {
   background: rgba(0, 0, 0, 0.3) !important;
   color: var(--text-muted);
-  font-weight: 800;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 11px;
@@ -564,7 +558,7 @@ h2 {
 
 /* Meal Highlights */
 .meal-title {
-  font-weight: 700;
+  font-weight: 500;
   color: #fff;
   display: inline;
 }
@@ -669,8 +663,7 @@ input[type='radio']:disabled {
 }
 
 /* Modern Checkbox & Radio Alignment Fix */
-.modern-checkbox,
-.modern-radio {
+.modern-checkbox, .modern-radio {
   appearance: none;
   width: 20px;
   height: 20px;
@@ -686,16 +679,10 @@ input[type='radio']:disabled {
   vertical-align: middle;
 }
 
-.modern-checkbox {
-  border-radius: 4px;
-}
+.modern-checkbox { border-radius: 4px; }
+.modern-radio { border-radius: 50%; }
 
-.modern-radio {
-  border-radius: 50%;
-}
-
-.modern-checkbox:checked,
-.modern-radio:checked {
+.modern-checkbox:checked, .modern-radio:checked {
   border-color: var(--accent-color);
   background: rgba(59, 130, 246, 0.1);
 }
@@ -858,20 +845,9 @@ hr.w3-opacity {
  *  SURVEY FLASHING ANIMATION
  * ------------------------------------- */
 @keyframes survey-pulse {
-  0% {
-    background-color: var(--danger-color);
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-  }
-
-  70% {
-    background-color: #dc2626;
-    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
-  }
-
-  100% {
-    background-color: var(--danger-color);
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
-  }
+  0% { background-color: var(--danger-color); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70% { background-color: #dc2626; box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  100% { background-color: var(--danger-color); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 
 .survey-btn-flashing {
@@ -880,27 +856,22 @@ hr.w3-opacity {
   border-left: 3px solid #fff !important;
 }
 
-.custom-survey-red,
-.custom-survey-red i,
-.custom-survey-red p {
+.custom-survey-red, .custom-survey-red i, .custom-survey-red p {
   color: #ff4d4d !important;
   text-shadow: 0 0 10px rgba(239, 68, 68, 0.4) !important;
 }
 
-.survey-btn-flashing i,
-.survey-btn-flashing p {
+.survey-btn-flashing i, .survey-btn-flashing p {
   color: white !important;
-  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
 
 .survey-nav-item {
-  color: #ff8080 !important;
-  /* Soft red for readability */
+  color: #ff8080 !important; /* Soft red for readability */
 }
 
 .survey-nav-item i {
-  color: #ef4444 !important;
-  /* Vivid red for icons */
+  color: #ef4444 !important; /* Vivid red for icons */
 }
 
 .survey-nav-item:hover {
